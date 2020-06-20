@@ -1,0 +1,33 @@
+{
+  "name": "@hyperspace/rpc",
+  "version": "0.0.0",
+  "description": "Raw RPC layer for Hyperspace",
+  "main": "index.js",
+  "scripts": {
+    "test": "standard",
+    "build": "hrpc schema.proto --rpc=index.js --messages=messages.js"
+  },
+  "author": "Hypercore Protocol Team",
+  "license": "MIT",
+  "devDependencies": {
+    "hrpc": "^2.1.1",
+    "standard": "^14.3.4"
+  },
+  "dependencies": {
+    "hrpc-runtime": "^2.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hyperspace-org/rpc.git"
+  },
+  "keywords": [
+    "hyperspace",
+    "rpc",
+    "raw",
+    "hrpc"
+  ],
+  "bugs": {
+    "url": "https://github.com/hyperspace-org/rpc/issues"
+  },
+  "homepage": "https://github.com/hyperspace-org/rpc#readme"
+}
