@@ -71,8 +71,9 @@ message CloseRequest {
 message GetRequest {
   required uint32 id = 1;
   required uint64 seq = 2;
-  optional bool wait = 3 [default = true];
-  optional bool ifAvailable = 4;
+  required uint64 resourceId = 3;
+  optional bool wait = 4 [default = true];
+  optional bool ifAvailable = 5;
 }
 message GetResponse {
   optional bytes block = 1;
@@ -114,6 +115,11 @@ message HasRequest {
 }
 message HasResponse {
   required bool has = 1;
+}
+
+message CancelRequest {
+  required uint64 id = 1;
+  required uint64 resourceId = 2;
 }
 
 message DownloadRequest {
@@ -210,6 +216,7 @@ service Hypercore {
   rpc Update (UpdateRequest) returns (Void);
   rpc Seek (SeekRequest) returns (SeekResponse);
   rpc Has (HasRequest) returns (HasResponse);
+  rpc Cancel (CancelRequest) returns (Void);
   rpc Download (DownloadRequest) returns (Void);
   rpc Downloaded (DownloadedRequest) returns (DownloadedResponse);
   rpc Undownload (UndownloadRequest) returns (Void);

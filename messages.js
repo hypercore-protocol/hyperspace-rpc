@@ -149,6 +149,13 @@ var HasResponse = exports.HasResponse = {
   decode: null
 }
 
+var CancelRequest = exports.CancelRequest = {
+  buffer: true,
+  encodingLength: null,
+  encode: null,
+  decode: null
+}
+
 var DownloadRequest = exports.DownloadRequest = {
   buffer: true,
   encodingLength: null,
@@ -267,6 +274,7 @@ defineSeekRequest()
 defineSeekResponse()
 defineHasRequest()
 defineHasResponse()
+defineCancelRequest()
 defineDownloadRequest()
 defineDownloadedRequest()
 defineDownloadedResponse()
@@ -1161,6 +1169,9 @@ function defineGetRequest () {
     if (!defined(obj.seq)) throw new Error("seq is required")
     var len = encodings.varint.encodingLength(obj.seq)
     length += 1 + len
+    if (!defined(obj.resourceId)) throw new Error("resourceId is required")
+    var len = encodings.varint.encodingLength(obj.resourceId)
+    length += 1 + len
     if (defined(obj.wait)) {
       var len = encodings.bool.encodingLength(obj.wait)
       length += 1 + len
@@ -1184,13 +1195,17 @@ function defineGetRequest () {
     buf[offset++] = 16
     encodings.varint.encode(obj.seq, buf, offset)
     offset += encodings.varint.encode.bytes
+    if (!defined(obj.resourceId)) throw new Error("resourceId is required")
+    buf[offset++] = 24
+    encodings.varint.encode(obj.resourceId, buf, offset)
+    offset += encodings.varint.encode.bytes
     if (defined(obj.wait)) {
-      buf[offset++] = 24
+      buf[offset++] = 32
       encodings.bool.encode(obj.wait, buf, offset)
       offset += encodings.bool.encode.bytes
     }
     if (defined(obj.ifAvailable)) {
-      buf[offset++] = 32
+      buf[offset++] = 40
       encodings.bool.encode(obj.ifAvailable, buf, offset)
       offset += encodings.bool.encode.bytes
     }
@@ -1206,14 +1221,16 @@ function defineGetRequest () {
     var obj = {
       id: 0,
       seq: 0,
+      resourceId: 0,
       wait: true,
       ifAvailable: false
     }
     var found0 = false
     var found1 = false
+    var found2 = false
     while (true) {
       if (end <= offset) {
-        if (!found0 || !found1) throw new Error("Decoded message is not valid")
+        if (!found0 || !found1 || !found2) throw new Error("Decoded message is not valid")
         decode.bytes = offset - oldOffset
         return obj
       }
@@ -1232,10 +1249,15 @@ function defineGetRequest () {
         found1 = true
         break
         case 3:
+        obj.resourceId = encodings.varint.decode(buf, offset)
+        offset += encodings.varint.decode.bytes
+        found2 = true
+        break
+        case 4:
         obj.wait = encodings.bool.decode(buf, offset)
         offset += encodings.bool.decode.bytes
         break
-        case 4:
+        case 5:
         obj.ifAvailable = encodings.bool.decode(buf, offset)
         offset += encodings.bool.decode.bytes
         break
@@ -1873,6 +1895,76 @@ function defineHasResponse () {
         obj.has = encodings.bool.decode(buf, offset)
         offset += encodings.bool.decode.bytes
         found0 = true
+        break
+        default:
+        offset = skip(prefix & 7, buf, offset)
+      }
+    }
+  }
+}
+
+function defineCancelRequest () {
+  CancelRequest.encodingLength = encodingLength
+  CancelRequest.encode = encode
+  CancelRequest.decode = decode
+
+  function encodingLength (obj) {
+    var length = 0
+    if (!defined(obj.id)) throw new Error("id is required")
+    var len = encodings.varint.encodingLength(obj.id)
+    length += 1 + len
+    if (!defined(obj.resourceId)) throw new Error("resourceId is required")
+    var len = encodings.varint.encodingLength(obj.resourceId)
+    length += 1 + len
+    return length
+  }
+
+  function encode (obj, buf, offset) {
+    if (!offset) offset = 0
+    if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
+    var oldOffset = offset
+    if (!defined(obj.id)) throw new Error("id is required")
+    buf[offset++] = 8
+    encodings.varint.encode(obj.id, buf, offset)
+    offset += encodings.varint.encode.bytes
+    if (!defined(obj.resourceId)) throw new Error("resourceId is required")
+    buf[offset++] = 16
+    encodings.varint.encode(obj.resourceId, buf, offset)
+    offset += encodings.varint.encode.bytes
+    encode.bytes = offset - oldOffset
+    return buf
+  }
+
+  function decode (buf, offset, end) {
+    if (!offset) offset = 0
+    if (!end) end = buf.length
+    if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
+    var oldOffset = offset
+    var obj = {
+      id: 0,
+      resourceId: 0
+    }
+    var found0 = false
+    var found1 = false
+    while (true) {
+      if (end <= offset) {
+        if (!found0 || !found1) throw new Error("Decoded message is not valid")
+        decode.bytes = offset - oldOffset
+        return obj
+      }
+      var prefix = varint.decode(buf, offset)
+      offset += varint.decode.bytes
+      var tag = prefix >> 3
+      switch (tag) {
+        case 1:
+        obj.id = encodings.varint.decode(buf, offset)
+        offset += encodings.varint.decode.bytes
+        found0 = true
+        break
+        case 2:
+        obj.resourceId = encodings.varint.decode(buf, offset)
+        offset += encodings.varint.decode.bytes
+        found1 = true
         break
         default:
         offset = skip(prefix & 7, buf, offset)
