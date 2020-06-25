@@ -226,6 +226,12 @@ class HRPCServiceHypercore {
       requestEncoding: messages.ExtensionMessage,
       responseEncoding: RPC.NULL
     })
+
+    this._onWait = service.defineMethod({
+      id: 20,
+      requestEncoding: messages.WaitEvent,
+      responseEncoding: RPC.NULL
+    })
   }
 
   onRequest (context, handlers = context) {
@@ -248,6 +254,7 @@ class HRPCServiceHypercore {
     if (handlers.onPeerOpen) this._onPeerOpen.onrequest = handlers.onPeerOpen.bind(context)
     if (handlers.onPeerRemove) this._onPeerRemove.onrequest = handlers.onPeerRemove.bind(context)
     if (handlers.onExtension) this._onExtension.onrequest = handlers.onExtension.bind(context)
+    if (handlers.onWait) this._onWait.onrequest = handlers.onWait.bind(context)
   }
 
   get (data) {
@@ -400,6 +407,14 @@ class HRPCServiceHypercore {
 
   onExtensionNoReply (data) {
     return this._onExtension.requestNoReply(data)
+  }
+
+  onWait (data) {
+    return this._onWait.request(data)
+  }
+
+  onWaitNoReply (data) {
+    return this._onWait.requestNoReply(data)
   }
 }
 
