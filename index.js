@@ -167,77 +167,74 @@ class HRPCServiceHypercore {
       responseEncoding: RPC.NULL
     })
 
-<<<<<<< Updated upstream
-=======
     this._cancel = service.defineMethod({
-      id: 9,
+      id: 10,
       requestEncoding: messages.CancelRequest,
       responseEncoding: RPC.NULL
     })
 
->>>>>>> Stashed changes
     this._close = service.defineMethod({
-      id: 10,
+      id: 11,
       requestEncoding: messages.CloseRequest,
       responseEncoding: RPC.NULL
     })
 
     this._registerExtension = service.defineMethod({
-      id: 11,
+      id: 12,
       requestEncoding: messages.RegisterExtensionRequest,
       responseEncoding: RPC.NULL
     })
 
     this._sendExtension = service.defineMethod({
-      id: 12,
+      id: 13,
       requestEncoding: messages.ExtensionMessage,
       responseEncoding: RPC.NULL
     })
 
     this._acquireLock = service.defineMethod({
-      id: 13,
-      requestEncoding: messages.LockRequest,
-      responseEncoding: RPC.NULL
-    })
-
-    this._releaseLock = service.defineMethod({
       id: 14,
       requestEncoding: messages.LockRequest,
       responseEncoding: RPC.NULL
     })
 
-    this._onAppend = service.defineMethod({
+    this._releaseLock = service.defineMethod({
       id: 15,
+      requestEncoding: messages.LockRequest,
+      responseEncoding: RPC.NULL
+    })
+
+    this._onAppend = service.defineMethod({
+      id: 16,
       requestEncoding: messages.AppendEvent,
       responseEncoding: RPC.NULL
     })
 
     this._onClose = service.defineMethod({
-      id: 16,
+      id: 17,
       requestEncoding: messages.CloseEvent,
       responseEncoding: RPC.NULL
     })
 
     this._onPeerOpen = service.defineMethod({
-      id: 17,
-      requestEncoding: messages.PeerEvent,
-      responseEncoding: RPC.NULL
-    })
-
-    this._onPeerRemove = service.defineMethod({
       id: 18,
       requestEncoding: messages.PeerEvent,
       responseEncoding: RPC.NULL
     })
 
-    this._onExtension = service.defineMethod({
+    this._onPeerRemove = service.defineMethod({
       id: 19,
+      requestEncoding: messages.PeerEvent,
+      responseEncoding: RPC.NULL
+    })
+
+    this._onExtension = service.defineMethod({
+      id: 20,
       requestEncoding: messages.ExtensionMessage,
       responseEncoding: RPC.NULL
     })
 
     this._onWait = service.defineMethod({
-      id: 20,
+      id: 21,
       requestEncoding: messages.WaitEvent,
       responseEncoding: RPC.NULL
     })

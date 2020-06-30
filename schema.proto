@@ -58,7 +58,7 @@ message NetworkStatusResponse {
   optional NetworkStatus status = 1;
 }
 
-message AllNetworkStatusesRequest {
+message AllNetworkStatusesResponse {
   repeated NetworkStatus statuses = 1;
 }
 

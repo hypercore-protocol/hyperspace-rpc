@@ -72,7 +72,7 @@ var NetworkStatusResponse = exports.NetworkStatusResponse = {
   decode: null
 }
 
-var AllNetworkStatusesRequest = exports.AllNetworkStatusesRequest = {
+var AllNetworkStatusesResponse = exports.AllNetworkStatusesResponse = {
   buffer: true,
   encodingLength: null,
   encode: null,
@@ -270,7 +270,7 @@ defineNetworkStatus()
 defineConfigureNetworkRequest()
 defineNetworkStatusRequest()
 defineNetworkStatusResponse()
-defineAllNetworkStatusesRequest()
+defineAllNetworkStatusesResponse()
 defineCloseRequest()
 defineGetRequest()
 defineGetResponse()
@@ -1042,10 +1042,10 @@ function defineNetworkStatusResponse () {
   }
 }
 
-function defineAllNetworkStatusesRequest () {
-  AllNetworkStatusesRequest.encodingLength = encodingLength
-  AllNetworkStatusesRequest.encode = encode
-  AllNetworkStatusesRequest.decode = decode
+function defineAllNetworkStatusesResponse () {
+  AllNetworkStatusesResponse.encodingLength = encodingLength
+  AllNetworkStatusesResponse.encode = encode
+  AllNetworkStatusesResponse.decode = decode
 
   function encodingLength (obj) {
     var length = 0
