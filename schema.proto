@@ -32,7 +32,11 @@ message FeedEvent {
 
 // Networking Methods
 
-message NetworkConfiguration {
+message OpenNetworkResponse {
+  repeated Peer peers = 1;
+}
+
+message NetworkStatus {
   required bytes discoveryKey = 1;
   optional bool announce = 2;
   optional bool lookup = 3;
@@ -40,26 +44,22 @@ message NetworkConfiguration {
 }
 
 message ConfigureNetworkRequest {
-  required NetworkConfiguration configuration = 1;
+  required NetworkStatus configuration = 1;
   optional bool flush = 2;
   optional bytes copyFrom = 3;
   optional bool overwrite = 4 [default = true];
 }
 
-message GetNetworkConfigurationRequest {
+message NetworkStatusRequest {
   required bytes discoveryKey = 1;
 }
 
-message GetNetworkConfigurationResponse {
-  optional NetworkConfiguration configuration = 1;
+message NetworkStatusResponse {
+  optional NetworkStatus status = 1;
 }
 
-message GetAllNetworkConfigurationsResponse {
-  repeated NetworkConfiguration configurations = 1;
-}
-
-message ListPeersResponse {
-  repeated Peer peers = 1;
+message AllNetworkStatusesRequest {
+  repeated NetworkStatus statuses = 1;
 }
 
 // Hypercore Methods
@@ -226,6 +226,7 @@ service Hypercore {
   rpc Download (DownloadRequest) returns (Void);
   rpc Downloaded (DownloadedRequest) returns (DownloadedResponse);
   rpc Undownload (UndownloadRequest) returns (Void);
+  rpc Cancel (CancelRequest) returns (Void);
   rpc Close (CloseRequest) returns (Void);
   rpc RegisterExtension (RegisterExtensionRequest) returns (Void);
   rpc SendExtension (ExtensionMessage) returns (Void);
@@ -244,13 +245,12 @@ service Hypercore {
 
 service Network {
    // Methods
+  rpc Open (Void) returns (OpenNetworkResponse);
   rpc Configure (ConfigureNetworkRequest) returns (Void);
-  rpc GetConfiguration (GetNetworkConfigurationRequest) returns (GetNetworkConfigurationResponse);
-  rpc GetAllConfigurations (Void) returns (GetAllNetworkConfigurationsResponse);
-  rpc ListPeers (Void) returns (ListPeersResponse);
+  rpc Status (NetworkStatusRequest) returns (NetworkStatusResponse);
+  rpc AllStatuses (Void) returns (AllNetworkStatusesResponse);
 
   // Events
-  rpc OnReady (NetworkReadyEvent) returns (Void);
-  rpc OnPeerOpen (PeerEvent) returns (Void);
+  rpc OnPeerAdd (PeerEvent) returns (Void);
   rpc OnPeerRemove (PeerEvent) returns (Void);
 }

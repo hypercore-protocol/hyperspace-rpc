@@ -37,7 +37,14 @@ var FeedEvent = exports.FeedEvent = {
   decode: null
 }
 
-var NetworkConfiguration = exports.NetworkConfiguration = {
+var OpenNetworkResponse = exports.OpenNetworkResponse = {
+  buffer: true,
+  encodingLength: null,
+  encode: null,
+  decode: null
+}
+
+var NetworkStatus = exports.NetworkStatus = {
   buffer: true,
   encodingLength: null,
   encode: null,
@@ -51,28 +58,21 @@ var ConfigureNetworkRequest = exports.ConfigureNetworkRequest = {
   decode: null
 }
 
-var GetNetworkConfigurationRequest = exports.GetNetworkConfigurationRequest = {
+var NetworkStatusRequest = exports.NetworkStatusRequest = {
   buffer: true,
   encodingLength: null,
   encode: null,
   decode: null
 }
 
-var GetNetworkConfigurationResponse = exports.GetNetworkConfigurationResponse = {
+var NetworkStatusResponse = exports.NetworkStatusResponse = {
   buffer: true,
   encodingLength: null,
   encode: null,
   decode: null
 }
 
-var GetAllNetworkConfigurationsResponse = exports.GetAllNetworkConfigurationsResponse = {
-  buffer: true,
-  encodingLength: null,
-  encode: null,
-  decode: null
-}
-
-var ListPeersResponse = exports.ListPeersResponse = {
+var AllNetworkStatusesRequest = exports.AllNetworkStatusesRequest = {
   buffer: true,
   encodingLength: null,
   encode: null,
@@ -265,12 +265,12 @@ definePeer()
 defineOpenRequest()
 defineOpenResponse()
 defineFeedEvent()
-defineNetworkConfiguration()
+defineOpenNetworkResponse()
+defineNetworkStatus()
 defineConfigureNetworkRequest()
-defineGetNetworkConfigurationRequest()
-defineGetNetworkConfigurationResponse()
-defineGetAllNetworkConfigurationsResponse()
-defineListPeersResponse()
+defineNetworkStatusRequest()
+defineNetworkStatusResponse()
+defineAllNetworkStatusesRequest()
 defineCloseRequest()
 defineGetRequest()
 defineGetResponse()
@@ -659,10 +659,76 @@ function defineFeedEvent () {
   }
 }
 
-function defineNetworkConfiguration () {
-  NetworkConfiguration.encodingLength = encodingLength
-  NetworkConfiguration.encode = encode
-  NetworkConfiguration.decode = decode
+function defineOpenNetworkResponse () {
+  OpenNetworkResponse.encodingLength = encodingLength
+  OpenNetworkResponse.encode = encode
+  OpenNetworkResponse.decode = decode
+
+  function encodingLength (obj) {
+    var length = 0
+    if (defined(obj.peers)) {
+      for (var i = 0; i < obj.peers.length; i++) {
+        if (!defined(obj.peers[i])) continue
+        var len = Peer.encodingLength(obj.peers[i])
+        length += varint.encodingLength(len)
+        length += 1 + len
+      }
+    }
+    return length
+  }
+
+  function encode (obj, buf, offset) {
+    if (!offset) offset = 0
+    if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
+    var oldOffset = offset
+    if (defined(obj.peers)) {
+      for (var i = 0; i < obj.peers.length; i++) {
+        if (!defined(obj.peers[i])) continue
+        buf[offset++] = 10
+        varint.encode(Peer.encodingLength(obj.peers[i]), buf, offset)
+        offset += varint.encode.bytes
+        Peer.encode(obj.peers[i], buf, offset)
+        offset += Peer.encode.bytes
+      }
+    }
+    encode.bytes = offset - oldOffset
+    return buf
+  }
+
+  function decode (buf, offset, end) {
+    if (!offset) offset = 0
+    if (!end) end = buf.length
+    if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
+    var oldOffset = offset
+    var obj = {
+      peers: []
+    }
+    while (true) {
+      if (end <= offset) {
+        decode.bytes = offset - oldOffset
+        return obj
+      }
+      var prefix = varint.decode(buf, offset)
+      offset += varint.decode.bytes
+      var tag = prefix >> 3
+      switch (tag) {
+        case 1:
+        var len = varint.decode(buf, offset)
+        offset += varint.decode.bytes
+        obj.peers.push(Peer.decode(buf, offset, offset + len))
+        offset += Peer.decode.bytes
+        break
+        default:
+        offset = skip(prefix & 7, buf, offset)
+      }
+    }
+  }
+}
+
+function defineNetworkStatus () {
+  NetworkStatus.encodingLength = encodingLength
+  NetworkStatus.encode = encode
+  NetworkStatus.decode = decode
 
   function encodingLength (obj) {
     var length = 0
@@ -765,7 +831,7 @@ function defineConfigureNetworkRequest () {
   function encodingLength (obj) {
     var length = 0
     if (!defined(obj.configuration)) throw new Error("configuration is required")
-    var len = NetworkConfiguration.encodingLength(obj.configuration)
+    var len = NetworkStatus.encodingLength(obj.configuration)
     length += varint.encodingLength(len)
     length += 1 + len
     if (defined(obj.flush)) {
@@ -789,10 +855,10 @@ function defineConfigureNetworkRequest () {
     var oldOffset = offset
     if (!defined(obj.configuration)) throw new Error("configuration is required")
     buf[offset++] = 10
-    varint.encode(NetworkConfiguration.encodingLength(obj.configuration), buf, offset)
+    varint.encode(NetworkStatus.encodingLength(obj.configuration), buf, offset)
     offset += varint.encode.bytes
-    NetworkConfiguration.encode(obj.configuration, buf, offset)
-    offset += NetworkConfiguration.encode.bytes
+    NetworkStatus.encode(obj.configuration, buf, offset)
+    offset += NetworkStatus.encode.bytes
     if (defined(obj.flush)) {
       buf[offset++] = 16
       encodings.bool.encode(obj.flush, buf, offset)
@@ -837,8 +903,8 @@ function defineConfigureNetworkRequest () {
         case 1:
         var len = varint.decode(buf, offset)
         offset += varint.decode.bytes
-        obj.configuration = NetworkConfiguration.decode(buf, offset, offset + len)
-        offset += NetworkConfiguration.decode.bytes
+        obj.configuration = NetworkStatus.decode(buf, offset, offset + len)
+        offset += NetworkStatus.decode.bytes
         found0 = true
         break
         case 2:
@@ -860,10 +926,10 @@ function defineConfigureNetworkRequest () {
   }
 }
 
-function defineGetNetworkConfigurationRequest () {
-  GetNetworkConfigurationRequest.encodingLength = encodingLength
-  GetNetworkConfigurationRequest.encode = encode
-  GetNetworkConfigurationRequest.decode = decode
+function defineNetworkStatusRequest () {
+  NetworkStatusRequest.encodingLength = encodingLength
+  NetworkStatusRequest.encode = encode
+  NetworkStatusRequest.decode = decode
 
   function encodingLength (obj) {
     var length = 0
@@ -916,15 +982,15 @@ function defineGetNetworkConfigurationRequest () {
   }
 }
 
-function defineGetNetworkConfigurationResponse () {
-  GetNetworkConfigurationResponse.encodingLength = encodingLength
-  GetNetworkConfigurationResponse.encode = encode
-  GetNetworkConfigurationResponse.decode = decode
+function defineNetworkStatusResponse () {
+  NetworkStatusResponse.encodingLength = encodingLength
+  NetworkStatusResponse.encode = encode
+  NetworkStatusResponse.decode = decode
 
   function encodingLength (obj) {
     var length = 0
-    if (defined(obj.configuration)) {
-      var len = NetworkConfiguration.encodingLength(obj.configuration)
+    if (defined(obj.status)) {
+      var len = NetworkStatus.encodingLength(obj.status)
       length += varint.encodingLength(len)
       length += 1 + len
     }
@@ -935,12 +1001,12 @@ function defineGetNetworkConfigurationResponse () {
     if (!offset) offset = 0
     if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
     var oldOffset = offset
-    if (defined(obj.configuration)) {
+    if (defined(obj.status)) {
       buf[offset++] = 10
-      varint.encode(NetworkConfiguration.encodingLength(obj.configuration), buf, offset)
+      varint.encode(NetworkStatus.encodingLength(obj.status), buf, offset)
       offset += varint.encode.bytes
-      NetworkConfiguration.encode(obj.configuration, buf, offset)
-      offset += NetworkConfiguration.encode.bytes
+      NetworkStatus.encode(obj.status, buf, offset)
+      offset += NetworkStatus.encode.bytes
     }
     encode.bytes = offset - oldOffset
     return buf
@@ -952,7 +1018,7 @@ function defineGetNetworkConfigurationResponse () {
     if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
     var oldOffset = offset
     var obj = {
-      configuration: null
+      status: null
     }
     while (true) {
       if (end <= offset) {
@@ -966,8 +1032,8 @@ function defineGetNetworkConfigurationResponse () {
         case 1:
         var len = varint.decode(buf, offset)
         offset += varint.decode.bytes
-        obj.configuration = NetworkConfiguration.decode(buf, offset, offset + len)
-        offset += NetworkConfiguration.decode.bytes
+        obj.status = NetworkStatus.decode(buf, offset, offset + len)
+        offset += NetworkStatus.decode.bytes
         break
         default:
         offset = skip(prefix & 7, buf, offset)
@@ -976,17 +1042,17 @@ function defineGetNetworkConfigurationResponse () {
   }
 }
 
-function defineGetAllNetworkConfigurationsResponse () {
-  GetAllNetworkConfigurationsResponse.encodingLength = encodingLength
-  GetAllNetworkConfigurationsResponse.encode = encode
-  GetAllNetworkConfigurationsResponse.decode = decode
+function defineAllNetworkStatusesRequest () {
+  AllNetworkStatusesRequest.encodingLength = encodingLength
+  AllNetworkStatusesRequest.encode = encode
+  AllNetworkStatusesRequest.decode = decode
 
   function encodingLength (obj) {
     var length = 0
-    if (defined(obj.configurations)) {
-      for (var i = 0; i < obj.configurations.length; i++) {
-        if (!defined(obj.configurations[i])) continue
-        var len = NetworkConfiguration.encodingLength(obj.configurations[i])
+    if (defined(obj.statuses)) {
+      for (var i = 0; i < obj.statuses.length; i++) {
+        if (!defined(obj.statuses[i])) continue
+        var len = NetworkStatus.encodingLength(obj.statuses[i])
         length += varint.encodingLength(len)
         length += 1 + len
       }
@@ -998,14 +1064,14 @@ function defineGetAllNetworkConfigurationsResponse () {
     if (!offset) offset = 0
     if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
     var oldOffset = offset
-    if (defined(obj.configurations)) {
-      for (var i = 0; i < obj.configurations.length; i++) {
-        if (!defined(obj.configurations[i])) continue
+    if (defined(obj.statuses)) {
+      for (var i = 0; i < obj.statuses.length; i++) {
+        if (!defined(obj.statuses[i])) continue
         buf[offset++] = 10
-        varint.encode(NetworkConfiguration.encodingLength(obj.configurations[i]), buf, offset)
+        varint.encode(NetworkStatus.encodingLength(obj.statuses[i]), buf, offset)
         offset += varint.encode.bytes
-        NetworkConfiguration.encode(obj.configurations[i], buf, offset)
-        offset += NetworkConfiguration.encode.bytes
+        NetworkStatus.encode(obj.statuses[i], buf, offset)
+        offset += NetworkStatus.encode.bytes
       }
     }
     encode.bytes = offset - oldOffset
@@ -1018,7 +1084,7 @@ function defineGetAllNetworkConfigurationsResponse () {
     if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
     var oldOffset = offset
     var obj = {
-      configurations: []
+      statuses: []
     }
     while (true) {
       if (end <= offset) {
@@ -1032,74 +1098,8 @@ function defineGetAllNetworkConfigurationsResponse () {
         case 1:
         var len = varint.decode(buf, offset)
         offset += varint.decode.bytes
-        obj.configurations.push(NetworkConfiguration.decode(buf, offset, offset + len))
-        offset += NetworkConfiguration.decode.bytes
-        break
-        default:
-        offset = skip(prefix & 7, buf, offset)
-      }
-    }
-  }
-}
-
-function defineListPeersResponse () {
-  ListPeersResponse.encodingLength = encodingLength
-  ListPeersResponse.encode = encode
-  ListPeersResponse.decode = decode
-
-  function encodingLength (obj) {
-    var length = 0
-    if (defined(obj.peers)) {
-      for (var i = 0; i < obj.peers.length; i++) {
-        if (!defined(obj.peers[i])) continue
-        var len = Peer.encodingLength(obj.peers[i])
-        length += varint.encodingLength(len)
-        length += 1 + len
-      }
-    }
-    return length
-  }
-
-  function encode (obj, buf, offset) {
-    if (!offset) offset = 0
-    if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
-    var oldOffset = offset
-    if (defined(obj.peers)) {
-      for (var i = 0; i < obj.peers.length; i++) {
-        if (!defined(obj.peers[i])) continue
-        buf[offset++] = 10
-        varint.encode(Peer.encodingLength(obj.peers[i]), buf, offset)
-        offset += varint.encode.bytes
-        Peer.encode(obj.peers[i], buf, offset)
-        offset += Peer.encode.bytes
-      }
-    }
-    encode.bytes = offset - oldOffset
-    return buf
-  }
-
-  function decode (buf, offset, end) {
-    if (!offset) offset = 0
-    if (!end) end = buf.length
-    if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
-    var oldOffset = offset
-    var obj = {
-      peers: []
-    }
-    while (true) {
-      if (end <= offset) {
-        decode.bytes = offset - oldOffset
-        return obj
-      }
-      var prefix = varint.decode(buf, offset)
-      offset += varint.decode.bytes
-      var tag = prefix >> 3
-      switch (tag) {
-        case 1:
-        var len = varint.decode(buf, offset)
-        offset += varint.decode.bytes
-        obj.peers.push(Peer.decode(buf, offset, offset + len))
-        offset += Peer.decode.bytes
+        obj.statuses.push(NetworkStatus.decode(buf, offset, offset + len))
+        offset += NetworkStatus.decode.bytes
         break
         default:
         offset = skip(prefix & 7, buf, offset)

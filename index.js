@@ -167,6 +167,15 @@ class HRPCServiceHypercore {
       responseEncoding: RPC.NULL
     })
 
+<<<<<<< Updated upstream
+=======
+    this._cancel = service.defineMethod({
+      id: 9,
+      requestEncoding: messages.CancelRequest,
+      responseEncoding: RPC.NULL
+    })
+
+>>>>>>> Stashed changes
     this._close = service.defineMethod({
       id: 10,
       requestEncoding: messages.CloseRequest,
@@ -244,6 +253,7 @@ class HRPCServiceHypercore {
     if (handlers.download) this._download.onrequest = handlers.download.bind(context)
     if (handlers.downloaded) this._downloaded.onrequest = handlers.downloaded.bind(context)
     if (handlers.undownload) this._undownload.onrequest = handlers.undownload.bind(context)
+    if (handlers.cancel) this._cancel.onrequest = handlers.cancel.bind(context)
     if (handlers.close) this._close.onrequest = handlers.close.bind(context)
     if (handlers.registerExtension) this._registerExtension.onrequest = handlers.registerExtension.bind(context)
     if (handlers.sendExtension) this._sendExtension.onrequest = handlers.sendExtension.bind(context)
@@ -327,6 +337,14 @@ class HRPCServiceHypercore {
 
   undownloadNoReply (data) {
     return this._undownload.requestNoReply(data)
+  }
+
+  cancel (data) {
+    return this._cancel.request(data)
+  }
+
+  cancelNoReply (data) {
+    return this._cancel.requestNoReply(data)
   }
 
   close (data) {
@@ -422,57 +440,58 @@ class HRPCServiceNetwork {
   constructor (rpc) {
     const service = rpc.defineService({ id: 4 })
 
-    this._configure = service.defineMethod({
+    this._open = service.defineMethod({
       id: 1,
+      requestEncoding: RPC.NULL,
+      responseEncoding: messages.OpenNetworkResponse
+    })
+
+    this._configure = service.defineMethod({
+      id: 2,
       requestEncoding: messages.ConfigureNetworkRequest,
       responseEncoding: RPC.NULL
     })
 
-    this._getConfiguration = service.defineMethod({
-      id: 2,
-      requestEncoding: messages.GetNetworkConfigurationRequest,
-      responseEncoding: messages.GetNetworkConfigurationResponse
-    })
-
-    this._getAllConfigurations = service.defineMethod({
+    this._status = service.defineMethod({
       id: 3,
-      requestEncoding: RPC.NULL,
-      responseEncoding: messages.GetAllNetworkConfigurationsResponse
+      requestEncoding: messages.NetworkStatusRequest,
+      responseEncoding: messages.NetworkStatusResponse
     })
 
-    this._listPeers = service.defineMethod({
+    this._allStatuses = service.defineMethod({
       id: 4,
       requestEncoding: RPC.NULL,
-      responseEncoding: messages.ListPeersResponse
+      responseEncoding: messages.AllNetworkStatusesResponse
     })
 
-    this._onReady = service.defineMethod({
+    this._onPeerAdd = service.defineMethod({
       id: 5,
-      requestEncoding: messages.NetworkReadyEvent,
-      responseEncoding: RPC.NULL
-    })
-
-    this._onPeerOpen = service.defineMethod({
-      id: 6,
       requestEncoding: messages.PeerEvent,
       responseEncoding: RPC.NULL
     })
 
     this._onPeerRemove = service.defineMethod({
-      id: 7,
+      id: 6,
       requestEncoding: messages.PeerEvent,
       responseEncoding: RPC.NULL
     })
   }
 
   onRequest (context, handlers = context) {
+    if (handlers.open) this._open.onrequest = handlers.open.bind(context)
     if (handlers.configure) this._configure.onrequest = handlers.configure.bind(context)
-    if (handlers.getConfiguration) this._getConfiguration.onrequest = handlers.getConfiguration.bind(context)
-    if (handlers.getAllConfigurations) this._getAllConfigurations.onrequest = handlers.getAllConfigurations.bind(context)
-    if (handlers.listPeers) this._listPeers.onrequest = handlers.listPeers.bind(context)
-    if (handlers.onReady) this._onReady.onrequest = handlers.onReady.bind(context)
-    if (handlers.onPeerOpen) this._onPeerOpen.onrequest = handlers.onPeerOpen.bind(context)
+    if (handlers.status) this._status.onrequest = handlers.status.bind(context)
+    if (handlers.allStatuses) this._allStatuses.onrequest = handlers.allStatuses.bind(context)
+    if (handlers.onPeerAdd) this._onPeerAdd.onrequest = handlers.onPeerAdd.bind(context)
     if (handlers.onPeerRemove) this._onPeerRemove.onrequest = handlers.onPeerRemove.bind(context)
+  }
+
+  open () {
+    return this._open.request()
+  }
+
+  openNoReply () {
+    return this._open.requestNoReply()
   }
 
   configure (data) {
@@ -483,44 +502,28 @@ class HRPCServiceNetwork {
     return this._configure.requestNoReply(data)
   }
 
-  getConfiguration (data) {
-    return this._getConfiguration.request(data)
+  status (data) {
+    return this._status.request(data)
   }
 
-  getConfigurationNoReply (data) {
-    return this._getConfiguration.requestNoReply(data)
+  statusNoReply (data) {
+    return this._status.requestNoReply(data)
   }
 
-  getAllConfigurations () {
-    return this._getAllConfigurations.request()
+  allStatuses () {
+    return this._allStatuses.request()
   }
 
-  getAllConfigurationsNoReply () {
-    return this._getAllConfigurations.requestNoReply()
+  allStatusesNoReply () {
+    return this._allStatuses.requestNoReply()
   }
 
-  listPeers () {
-    return this._listPeers.request()
+  onPeerAdd (data) {
+    return this._onPeerAdd.request(data)
   }
 
-  listPeersNoReply () {
-    return this._listPeers.requestNoReply()
-  }
-
-  onReady (data) {
-    return this._onReady.request(data)
-  }
-
-  onReadyNoReply (data) {
-    return this._onReady.requestNoReply(data)
-  }
-
-  onPeerOpen (data) {
-    return this._onPeerOpen.request(data)
-  }
-
-  onPeerOpenNoReply (data) {
-    return this._onPeerOpen.requestNoReply(data)
+  onPeerAddNoReply (data) {
+    return this._onPeerAdd.requestNoReply(data)
   }
 
   onPeerRemove (data) {
