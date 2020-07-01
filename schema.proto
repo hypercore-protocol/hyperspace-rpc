@@ -186,26 +186,7 @@ message WaitEvent {
   required uint64 onWaitId = 2;
 }
 
-message PluginRequest {
-  required string name = 1;
-  optional bytes value = 2;
-}
-
-message PluginResponse {
-  optional bytes value = 1;
-}
-
-message PluginStatus {
-  optional bool running = 1;
-}
-
 // TODO: Before official release, tag these methods with explicit IDs.
-
-service Plugins {
-  rpc Start (PluginRequest) returns (PluginResponse);
-  rpc Stop (PluginRequest) returns (Void);
-  rpc Status (PluginRequest) returns (PluginStatus);
-}
 
 service Corestore {
    // Methods

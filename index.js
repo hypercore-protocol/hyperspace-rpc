@@ -16,63 +16,9 @@ const errorEncoding = {
   }
 }
 
-class HRPCServicePlugins {
-  constructor (rpc) {
-    const service = rpc.defineService({ id: 1 })
-
-    this._start = service.defineMethod({
-      id: 1,
-      requestEncoding: messages.PluginRequest,
-      responseEncoding: messages.PluginResponse
-    })
-
-    this._stop = service.defineMethod({
-      id: 2,
-      requestEncoding: messages.PluginRequest,
-      responseEncoding: RPC.NULL
-    })
-
-    this._status = service.defineMethod({
-      id: 3,
-      requestEncoding: messages.PluginRequest,
-      responseEncoding: messages.PluginStatus
-    })
-  }
-
-  onRequest (context, handlers = context) {
-    if (handlers.start) this._start.onrequest = handlers.start.bind(context)
-    if (handlers.stop) this._stop.onrequest = handlers.stop.bind(context)
-    if (handlers.status) this._status.onrequest = handlers.status.bind(context)
-  }
-
-  start (data) {
-    return this._start.request(data)
-  }
-
-  startNoReply (data) {
-    return this._start.requestNoReply(data)
-  }
-
-  stop (data) {
-    return this._stop.request(data)
-  }
-
-  stopNoReply (data) {
-    return this._stop.requestNoReply(data)
-  }
-
-  status (data) {
-    return this._status.request(data)
-  }
-
-  statusNoReply (data) {
-    return this._status.requestNoReply(data)
-  }
-}
-
 class HRPCServiceCorestore {
   constructor (rpc) {
-    const service = rpc.defineService({ id: 2 })
+    const service = rpc.defineService({ id: 1 })
 
     this._open = service.defineMethod({
       id: 1,
@@ -111,7 +57,7 @@ class HRPCServiceCorestore {
 
 class HRPCServiceHypercore {
   constructor (rpc) {
-    const service = rpc.defineService({ id: 3 })
+    const service = rpc.defineService({ id: 2 })
 
     this._get = service.defineMethod({
       id: 1,
@@ -435,7 +381,7 @@ class HRPCServiceHypercore {
 
 class HRPCServiceNetwork {
   constructor (rpc) {
-    const service = rpc.defineService({ id: 4 })
+    const service = rpc.defineService({ id: 3 })
 
     this._open = service.defineMethod({
       id: 1,
@@ -549,7 +495,6 @@ module.exports = class HRPCSession extends HRPC {
       if ((err !== this.rawSocketError && !isStreamError(err)) || this.listenerCount('error')) this.emit('error', err)
     })
 
-    this.plugins = new HRPCServicePlugins(rpc)
     this.corestore = new HRPCServiceCorestore(rpc)
     this.hypercore = new HRPCServiceHypercore(rpc)
     this.network = new HRPCServiceNetwork(rpc)
