@@ -1216,7 +1216,7 @@ function defineGetRequest () {
       seq: 0,
       resourceId: 0,
       wait: true,
-      ifAvailable: false,
+      ifAvailable: true,
       onWaitId: 0
     }
     var found0 = false
@@ -1541,7 +1541,7 @@ function defineUpdateRequest () {
     var obj = {
       id: 0,
       minLength: 0,
-      ifAvailable: false,
+      ifAvailable: true,
       hash: true
     }
     var found0 = false
@@ -1658,7 +1658,7 @@ function defineSeekRequest () {
       start: 0,
       end: 0,
       wait: true,
-      ifAvailable: false
+      ifAvailable: true
     }
     var found0 = false
     var found1 = false

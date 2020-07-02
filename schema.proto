@@ -73,7 +73,7 @@ message GetRequest {
   required uint64 seq = 2;
   required uint64 resourceId = 3;
   optional bool wait = 4 [default = true];
-  optional bool ifAvailable = 5;
+  optional bool ifAvailable = 5 [default = true];
   optional uint64 onWaitId = 6;
 }
 message GetResponse {
@@ -93,7 +93,7 @@ message AppendResponse {
 message UpdateRequest {
   required uint32 id = 1;
   optional uint64 minLength = 2;
-  optional bool ifAvailable = 3;
+  optional bool ifAvailable = 3 [default = true];
   optional bool hash = 4 [default = true];
 }
 
@@ -103,7 +103,7 @@ message SeekRequest {
   optional uint64 start = 3;
   optional uint64 end = 4;
   optional bool wait = 5 [default = true];
-  optional bool ifAvailable = 6;
+  optional bool ifAvailable = 6 [default = true];
 }
 message SeekResponse {
   required uint64 seq = 1;
