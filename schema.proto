@@ -33,7 +33,8 @@ message FeedEvent {
 // Networking Methods
 
 message OpenNetworkResponse {
-  repeated Peer peers = 1;
+  required bytes publicKey = 1;
+  repeated Peer peers = 2;
 }
 
 message NetworkStatus {

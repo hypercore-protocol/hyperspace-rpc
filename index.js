@@ -131,56 +131,62 @@ class HRPCServiceHypercore {
       responseEncoding: RPC.NULL
     })
 
-    this._sendExtension = service.defineMethod({
+    this._unregisterExtension = service.defineMethod({
       id: 13,
+      requestEncoding: messages.UnregisterExtensionRequest,
+      responseEncoding: RPC.NULL
+    })
+
+    this._sendExtension = service.defineMethod({
+      id: 14,
       requestEncoding: messages.ExtensionMessage,
       responseEncoding: RPC.NULL
     })
 
     this._acquireLock = service.defineMethod({
-      id: 14,
-      requestEncoding: messages.LockRequest,
-      responseEncoding: RPC.NULL
-    })
-
-    this._releaseLock = service.defineMethod({
       id: 15,
       requestEncoding: messages.LockRequest,
       responseEncoding: RPC.NULL
     })
 
-    this._onAppend = service.defineMethod({
+    this._releaseLock = service.defineMethod({
       id: 16,
+      requestEncoding: messages.LockRequest,
+      responseEncoding: RPC.NULL
+    })
+
+    this._onAppend = service.defineMethod({
+      id: 17,
       requestEncoding: messages.AppendEvent,
       responseEncoding: RPC.NULL
     })
 
     this._onClose = service.defineMethod({
-      id: 17,
+      id: 18,
       requestEncoding: messages.CloseEvent,
       responseEncoding: RPC.NULL
     })
 
     this._onPeerOpen = service.defineMethod({
-      id: 18,
-      requestEncoding: messages.PeerEvent,
-      responseEncoding: RPC.NULL
-    })
-
-    this._onPeerRemove = service.defineMethod({
       id: 19,
       requestEncoding: messages.PeerEvent,
       responseEncoding: RPC.NULL
     })
 
-    this._onExtension = service.defineMethod({
+    this._onPeerRemove = service.defineMethod({
       id: 20,
+      requestEncoding: messages.PeerEvent,
+      responseEncoding: RPC.NULL
+    })
+
+    this._onExtension = service.defineMethod({
+      id: 21,
       requestEncoding: messages.ExtensionMessage,
       responseEncoding: RPC.NULL
     })
 
     this._onWait = service.defineMethod({
-      id: 21,
+      id: 22,
       requestEncoding: messages.WaitEvent,
       responseEncoding: RPC.NULL
     })
@@ -199,6 +205,7 @@ class HRPCServiceHypercore {
     if (handlers.cancel) this._cancel.onrequest = handlers.cancel.bind(context)
     if (handlers.close) this._close.onrequest = handlers.close.bind(context)
     if (handlers.registerExtension) this._registerExtension.onrequest = handlers.registerExtension.bind(context)
+    if (handlers.unregisterExtension) this._unregisterExtension.onrequest = handlers.unregisterExtension.bind(context)
     if (handlers.sendExtension) this._sendExtension.onrequest = handlers.sendExtension.bind(context)
     if (handlers.acquireLock) this._acquireLock.onrequest = handlers.acquireLock.bind(context)
     if (handlers.releaseLock) this._releaseLock.onrequest = handlers.releaseLock.bind(context)
@@ -306,6 +313,14 @@ class HRPCServiceHypercore {
     return this._registerExtension.requestNoReply(data)
   }
 
+  unregisterExtension (data) {
+    return this._unregisterExtension.request(data)
+  }
+
+  unregisterExtensionNoReply (data) {
+    return this._unregisterExtension.requestNoReply(data)
+  }
+
   sendExtension (data) {
     return this._sendExtension.request(data)
   }
@@ -407,15 +422,39 @@ class HRPCServiceNetwork {
       responseEncoding: messages.AllNetworkStatusesResponse
     })
 
-    this._onPeerAdd = service.defineMethod({
+    this._registerExtension = service.defineMethod({
       id: 5,
+      requestEncoding: messages.RegisterExtensionRequest,
+      responseEncoding: RPC.NULL
+    })
+
+    this._unregisterExtension = service.defineMethod({
+      id: 6,
+      requestEncoding: messages.UnregisterExtensionRequest,
+      responseEncoding: RPC.NULL
+    })
+
+    this._sendExtension = service.defineMethod({
+      id: 7,
+      requestEncoding: messages.ExtensionMessage,
+      responseEncoding: RPC.NULL
+    })
+
+    this._onPeerAdd = service.defineMethod({
+      id: 8,
       requestEncoding: messages.PeerEvent,
       responseEncoding: RPC.NULL
     })
 
     this._onPeerRemove = service.defineMethod({
-      id: 6,
+      id: 9,
       requestEncoding: messages.PeerEvent,
+      responseEncoding: RPC.NULL
+    })
+
+    this._onExtension = service.defineMethod({
+      id: 10,
+      requestEncoding: messages.ExtensionMessage,
       responseEncoding: RPC.NULL
     })
   }
@@ -425,8 +464,12 @@ class HRPCServiceNetwork {
     if (handlers.configure) this._configure.onrequest = handlers.configure.bind(context)
     if (handlers.status) this._status.onrequest = handlers.status.bind(context)
     if (handlers.allStatuses) this._allStatuses.onrequest = handlers.allStatuses.bind(context)
+    if (handlers.registerExtension) this._registerExtension.onrequest = handlers.registerExtension.bind(context)
+    if (handlers.unregisterExtension) this._unregisterExtension.onrequest = handlers.unregisterExtension.bind(context)
+    if (handlers.sendExtension) this._sendExtension.onrequest = handlers.sendExtension.bind(context)
     if (handlers.onPeerAdd) this._onPeerAdd.onrequest = handlers.onPeerAdd.bind(context)
     if (handlers.onPeerRemove) this._onPeerRemove.onrequest = handlers.onPeerRemove.bind(context)
+    if (handlers.onExtension) this._onExtension.onrequest = handlers.onExtension.bind(context)
   }
 
   open () {
@@ -461,6 +504,30 @@ class HRPCServiceNetwork {
     return this._allStatuses.requestNoReply()
   }
 
+  registerExtension (data) {
+    return this._registerExtension.request(data)
+  }
+
+  registerExtensionNoReply (data) {
+    return this._registerExtension.requestNoReply(data)
+  }
+
+  unregisterExtension (data) {
+    return this._unregisterExtension.request(data)
+  }
+
+  unregisterExtensionNoReply (data) {
+    return this._unregisterExtension.requestNoReply(data)
+  }
+
+  sendExtension (data) {
+    return this._sendExtension.request(data)
+  }
+
+  sendExtensionNoReply (data) {
+    return this._sendExtension.requestNoReply(data)
+  }
+
   onPeerAdd (data) {
     return this._onPeerAdd.request(data)
   }
@@ -475,6 +542,14 @@ class HRPCServiceNetwork {
 
   onPeerRemoveNoReply (data) {
     return this._onPeerRemove.requestNoReply(data)
+  }
+
+  onExtension (data) {
+    return this._onExtension.request(data)
+  }
+
+  onExtensionNoReply (data) {
+    return this._onExtension.requestNoReply(data)
   }
 }
 

@@ -79,6 +79,20 @@ var AllNetworkStatusesResponse = exports.AllNetworkStatusesResponse = {
   decode: null
 }
 
+var RegisterNetworkExtensionRequest = exports.RegisterNetworkExtensionRequest = {
+  buffer: true,
+  encodingLength: null,
+  encode: null,
+  decode: null
+}
+
+var NetworkExtensionMessage = exports.NetworkExtensionMessage = {
+  buffer: true,
+  encodingLength: null,
+  encode: null,
+  decode: null
+}
+
 var CloseRequest = exports.CloseRequest = {
   buffer: true,
   encodingLength: null,
@@ -191,20 +205,6 @@ var LockRequest = exports.LockRequest = {
   decode: null
 }
 
-var RegisterExtensionRequest = exports.RegisterExtensionRequest = {
-  buffer: true,
-  encodingLength: null,
-  encode: null,
-  decode: null
-}
-
-var ExtensionMessage = exports.ExtensionMessage = {
-  buffer: true,
-  encodingLength: null,
-  encode: null,
-  decode: null
-}
-
 var AppendEvent = exports.AppendEvent = {
   buffer: true,
   encodingLength: null,
@@ -233,6 +233,27 @@ var WaitEvent = exports.WaitEvent = {
   decode: null
 }
 
+var RegisterExtensionRequest = exports.RegisterExtensionRequest = {
+  buffer: true,
+  encodingLength: null,
+  encode: null,
+  decode: null
+}
+
+var UnregisterExtensionRequest = exports.UnregisterExtensionRequest = {
+  buffer: true,
+  encodingLength: null,
+  encode: null,
+  decode: null
+}
+
+var ExtensionMessage = exports.ExtensionMessage = {
+  buffer: true,
+  encodingLength: null,
+  encode: null,
+  decode: null
+}
+
 var RPCError = exports.RPCError = {
   buffer: true,
   encodingLength: null,
@@ -250,6 +271,8 @@ defineConfigureNetworkRequest()
 defineNetworkStatusRequest()
 defineNetworkStatusResponse()
 defineAllNetworkStatusesResponse()
+defineRegisterNetworkExtensionRequest()
+defineNetworkExtensionMessage()
 defineCloseRequest()
 defineGetRequest()
 defineGetResponse()
@@ -266,12 +289,13 @@ defineDownloadedRequest()
 defineDownloadedResponse()
 defineUndownloadRequest()
 defineLockRequest()
-defineRegisterExtensionRequest()
-defineExtensionMessage()
 defineAppendEvent()
 definePeerEvent()
 defineCloseEvent()
 defineWaitEvent()
+defineRegisterExtensionRequest()
+defineUnregisterExtensionRequest()
+defineExtensionMessage()
 defineRPCError()
 
 function definePeer () {
@@ -642,6 +666,9 @@ function defineOpenNetworkResponse () {
 
   function encodingLength (obj) {
     var length = 0
+    if (!defined(obj.publicKey)) throw new Error("publicKey is required")
+    var len = encodings.bytes.encodingLength(obj.publicKey)
+    length += 1 + len
     if (defined(obj.peers)) {
       for (var i = 0; i < obj.peers.length; i++) {
         if (!defined(obj.peers[i])) continue
@@ -657,10 +684,14 @@ function defineOpenNetworkResponse () {
     if (!offset) offset = 0
     if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
     var oldOffset = offset
+    if (!defined(obj.publicKey)) throw new Error("publicKey is required")
+    buf[offset++] = 10
+    encodings.bytes.encode(obj.publicKey, buf, offset)
+    offset += encodings.bytes.encode.bytes
     if (defined(obj.peers)) {
       for (var i = 0; i < obj.peers.length; i++) {
         if (!defined(obj.peers[i])) continue
-        buf[offset++] = 10
+        buf[offset++] = 18
         varint.encode(Peer.encodingLength(obj.peers[i]), buf, offset)
         offset += varint.encode.bytes
         Peer.encode(obj.peers[i], buf, offset)
@@ -677,10 +708,13 @@ function defineOpenNetworkResponse () {
     if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
     var oldOffset = offset
     var obj = {
+      publicKey: null,
       peers: []
     }
+    var found0 = false
     while (true) {
       if (end <= offset) {
+        if (!found0) throw new Error("Decoded message is not valid")
         decode.bytes = offset - oldOffset
         return obj
       }
@@ -689,6 +723,11 @@ function defineOpenNetworkResponse () {
       var tag = prefix >> 3
       switch (tag) {
         case 1:
+        obj.publicKey = encodings.bytes.decode(buf, offset)
+        offset += encodings.bytes.decode.bytes
+        found0 = true
+        break
+        case 2:
         var len = varint.decode(buf, offset)
         offset += varint.decode.bytes
         obj.peers.push(Peer.decode(buf, offset, offset + len))
@@ -1076,6 +1115,174 @@ function defineAllNetworkStatusesResponse () {
         offset += varint.decode.bytes
         obj.statuses.push(NetworkStatus.decode(buf, offset, offset + len))
         offset += NetworkStatus.decode.bytes
+        break
+        default:
+        offset = skip(prefix & 7, buf, offset)
+      }
+    }
+  }
+}
+
+function defineRegisterNetworkExtensionRequest () {
+  RegisterNetworkExtensionRequest.encodingLength = encodingLength
+  RegisterNetworkExtensionRequest.encode = encode
+  RegisterNetworkExtensionRequest.decode = decode
+
+  function encodingLength (obj) {
+    var length = 0
+    if (!defined(obj.resourceId)) throw new Error("resourceId is required")
+    var len = encodings.varint.encodingLength(obj.resourceId)
+    length += 1 + len
+    if (!defined(obj.name)) throw new Error("name is required")
+    var len = encodings.string.encodingLength(obj.name)
+    length += 1 + len
+    return length
+  }
+
+  function encode (obj, buf, offset) {
+    if (!offset) offset = 0
+    if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
+    var oldOffset = offset
+    if (!defined(obj.resourceId)) throw new Error("resourceId is required")
+    buf[offset++] = 8
+    encodings.varint.encode(obj.resourceId, buf, offset)
+    offset += encodings.varint.encode.bytes
+    if (!defined(obj.name)) throw new Error("name is required")
+    buf[offset++] = 26
+    encodings.string.encode(obj.name, buf, offset)
+    offset += encodings.string.encode.bytes
+    encode.bytes = offset - oldOffset
+    return buf
+  }
+
+  function decode (buf, offset, end) {
+    if (!offset) offset = 0
+    if (!end) end = buf.length
+    if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
+    var oldOffset = offset
+    var obj = {
+      resourceId: 0,
+      name: ""
+    }
+    var found0 = false
+    var found1 = false
+    while (true) {
+      if (end <= offset) {
+        if (!found0 || !found1) throw new Error("Decoded message is not valid")
+        decode.bytes = offset - oldOffset
+        return obj
+      }
+      var prefix = varint.decode(buf, offset)
+      offset += varint.decode.bytes
+      var tag = prefix >> 3
+      switch (tag) {
+        case 1:
+        obj.resourceId = encodings.varint.decode(buf, offset)
+        offset += encodings.varint.decode.bytes
+        found0 = true
+        break
+        case 3:
+        obj.name = encodings.string.decode(buf, offset)
+        offset += encodings.string.decode.bytes
+        found1 = true
+        break
+        default:
+        offset = skip(prefix & 7, buf, offset)
+      }
+    }
+  }
+}
+
+function defineNetworkExtensionMessage () {
+  NetworkExtensionMessage.encodingLength = encodingLength
+  NetworkExtensionMessage.encode = encode
+  NetworkExtensionMessage.decode = decode
+
+  function encodingLength (obj) {
+    var length = 0
+    if (!defined(obj.id)) throw new Error("id is required")
+    var len = encodings.varint.encodingLength(obj.id)
+    length += 1 + len
+    if (!defined(obj.resourceId)) throw new Error("resourceId is required")
+    var len = encodings.varint.encodingLength(obj.resourceId)
+    length += 1 + len
+    if (defined(obj.remotePublicKey)) {
+      var len = encodings.bytes.encodingLength(obj.remotePublicKey)
+      length += 1 + len
+    }
+    if (!defined(obj.data)) throw new Error("data is required")
+    var len = encodings.bytes.encodingLength(obj.data)
+    length += 1 + len
+    return length
+  }
+
+  function encode (obj, buf, offset) {
+    if (!offset) offset = 0
+    if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
+    var oldOffset = offset
+    if (!defined(obj.id)) throw new Error("id is required")
+    buf[offset++] = 8
+    encodings.varint.encode(obj.id, buf, offset)
+    offset += encodings.varint.encode.bytes
+    if (!defined(obj.resourceId)) throw new Error("resourceId is required")
+    buf[offset++] = 16
+    encodings.varint.encode(obj.resourceId, buf, offset)
+    offset += encodings.varint.encode.bytes
+    if (defined(obj.remotePublicKey)) {
+      buf[offset++] = 26
+      encodings.bytes.encode(obj.remotePublicKey, buf, offset)
+      offset += encodings.bytes.encode.bytes
+    }
+    if (!defined(obj.data)) throw new Error("data is required")
+    buf[offset++] = 34
+    encodings.bytes.encode(obj.data, buf, offset)
+    offset += encodings.bytes.encode.bytes
+    encode.bytes = offset - oldOffset
+    return buf
+  }
+
+  function decode (buf, offset, end) {
+    if (!offset) offset = 0
+    if (!end) end = buf.length
+    if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
+    var oldOffset = offset
+    var obj = {
+      id: 0,
+      resourceId: 0,
+      remotePublicKey: null,
+      data: null
+    }
+    var found0 = false
+    var found1 = false
+    var found3 = false
+    while (true) {
+      if (end <= offset) {
+        if (!found0 || !found1 || !found3) throw new Error("Decoded message is not valid")
+        decode.bytes = offset - oldOffset
+        return obj
+      }
+      var prefix = varint.decode(buf, offset)
+      offset += varint.decode.bytes
+      var tag = prefix >> 3
+      switch (tag) {
+        case 1:
+        obj.id = encodings.varint.decode(buf, offset)
+        offset += encodings.varint.decode.bytes
+        found0 = true
+        break
+        case 2:
+        obj.resourceId = encodings.varint.decode(buf, offset)
+        offset += encodings.varint.decode.bytes
+        found1 = true
+        break
+        case 3:
+        obj.remotePublicKey = encodings.bytes.decode(buf, offset)
+        offset += encodings.bytes.decode.bytes
+        break
+        case 4:
+        obj.data = encodings.bytes.decode(buf, offset)
+        offset += encodings.bytes.decode.bytes
+        found3 = true
         break
         default:
         offset = skip(prefix & 7, buf, offset)
@@ -2369,188 +2576,6 @@ function defineLockRequest () {
   }
 }
 
-function defineRegisterExtensionRequest () {
-  RegisterExtensionRequest.encodingLength = encodingLength
-  RegisterExtensionRequest.encode = encode
-  RegisterExtensionRequest.decode = decode
-
-  function encodingLength (obj) {
-    var length = 0
-    if (!defined(obj.id)) throw new Error("id is required")
-    var len = encodings.varint.encodingLength(obj.id)
-    length += 1 + len
-    if (!defined(obj.resourceId)) throw new Error("resourceId is required")
-    var len = encodings.varint.encodingLength(obj.resourceId)
-    length += 1 + len
-    if (!defined(obj.name)) throw new Error("name is required")
-    var len = encodings.string.encodingLength(obj.name)
-    length += 1 + len
-    return length
-  }
-
-  function encode (obj, buf, offset) {
-    if (!offset) offset = 0
-    if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
-    var oldOffset = offset
-    if (!defined(obj.id)) throw new Error("id is required")
-    buf[offset++] = 8
-    encodings.varint.encode(obj.id, buf, offset)
-    offset += encodings.varint.encode.bytes
-    if (!defined(obj.resourceId)) throw new Error("resourceId is required")
-    buf[offset++] = 16
-    encodings.varint.encode(obj.resourceId, buf, offset)
-    offset += encodings.varint.encode.bytes
-    if (!defined(obj.name)) throw new Error("name is required")
-    buf[offset++] = 26
-    encodings.string.encode(obj.name, buf, offset)
-    offset += encodings.string.encode.bytes
-    encode.bytes = offset - oldOffset
-    return buf
-  }
-
-  function decode (buf, offset, end) {
-    if (!offset) offset = 0
-    if (!end) end = buf.length
-    if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
-    var oldOffset = offset
-    var obj = {
-      id: 0,
-      resourceId: 0,
-      name: ""
-    }
-    var found0 = false
-    var found1 = false
-    var found2 = false
-    while (true) {
-      if (end <= offset) {
-        if (!found0 || !found1 || !found2) throw new Error("Decoded message is not valid")
-        decode.bytes = offset - oldOffset
-        return obj
-      }
-      var prefix = varint.decode(buf, offset)
-      offset += varint.decode.bytes
-      var tag = prefix >> 3
-      switch (tag) {
-        case 1:
-        obj.id = encodings.varint.decode(buf, offset)
-        offset += encodings.varint.decode.bytes
-        found0 = true
-        break
-        case 2:
-        obj.resourceId = encodings.varint.decode(buf, offset)
-        offset += encodings.varint.decode.bytes
-        found1 = true
-        break
-        case 3:
-        obj.name = encodings.string.decode(buf, offset)
-        offset += encodings.string.decode.bytes
-        found2 = true
-        break
-        default:
-        offset = skip(prefix & 7, buf, offset)
-      }
-    }
-  }
-}
-
-function defineExtensionMessage () {
-  ExtensionMessage.encodingLength = encodingLength
-  ExtensionMessage.encode = encode
-  ExtensionMessage.decode = decode
-
-  function encodingLength (obj) {
-    var length = 0
-    if (!defined(obj.id)) throw new Error("id is required")
-    var len = encodings.varint.encodingLength(obj.id)
-    length += 1 + len
-    if (!defined(obj.resourceId)) throw new Error("resourceId is required")
-    var len = encodings.varint.encodingLength(obj.resourceId)
-    length += 1 + len
-    if (defined(obj.remotePublicKey)) {
-      var len = encodings.bytes.encodingLength(obj.remotePublicKey)
-      length += 1 + len
-    }
-    if (!defined(obj.data)) throw new Error("data is required")
-    var len = encodings.bytes.encodingLength(obj.data)
-    length += 1 + len
-    return length
-  }
-
-  function encode (obj, buf, offset) {
-    if (!offset) offset = 0
-    if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
-    var oldOffset = offset
-    if (!defined(obj.id)) throw new Error("id is required")
-    buf[offset++] = 8
-    encodings.varint.encode(obj.id, buf, offset)
-    offset += encodings.varint.encode.bytes
-    if (!defined(obj.resourceId)) throw new Error("resourceId is required")
-    buf[offset++] = 16
-    encodings.varint.encode(obj.resourceId, buf, offset)
-    offset += encodings.varint.encode.bytes
-    if (defined(obj.remotePublicKey)) {
-      buf[offset++] = 26
-      encodings.bytes.encode(obj.remotePublicKey, buf, offset)
-      offset += encodings.bytes.encode.bytes
-    }
-    if (!defined(obj.data)) throw new Error("data is required")
-    buf[offset++] = 34
-    encodings.bytes.encode(obj.data, buf, offset)
-    offset += encodings.bytes.encode.bytes
-    encode.bytes = offset - oldOffset
-    return buf
-  }
-
-  function decode (buf, offset, end) {
-    if (!offset) offset = 0
-    if (!end) end = buf.length
-    if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
-    var oldOffset = offset
-    var obj = {
-      id: 0,
-      resourceId: 0,
-      remotePublicKey: null,
-      data: null
-    }
-    var found0 = false
-    var found1 = false
-    var found3 = false
-    while (true) {
-      if (end <= offset) {
-        if (!found0 || !found1 || !found3) throw new Error("Decoded message is not valid")
-        decode.bytes = offset - oldOffset
-        return obj
-      }
-      var prefix = varint.decode(buf, offset)
-      offset += varint.decode.bytes
-      var tag = prefix >> 3
-      switch (tag) {
-        case 1:
-        obj.id = encodings.varint.decode(buf, offset)
-        offset += encodings.varint.decode.bytes
-        found0 = true
-        break
-        case 2:
-        obj.resourceId = encodings.varint.decode(buf, offset)
-        offset += encodings.varint.decode.bytes
-        found1 = true
-        break
-        case 3:
-        obj.remotePublicKey = encodings.bytes.decode(buf, offset)
-        offset += encodings.bytes.decode.bytes
-        break
-        case 4:
-        obj.data = encodings.bytes.decode(buf, offset)
-        offset += encodings.bytes.decode.bytes
-        found3 = true
-        break
-        default:
-        offset = skip(prefix & 7, buf, offset)
-      }
-    }
-  }
-}
-
 function defineAppendEvent () {
   AppendEvent.encodingLength = encodingLength
   AppendEvent.encode = encode
@@ -2828,6 +2853,258 @@ function defineWaitEvent () {
         obj.onWaitId = encodings.varint.decode(buf, offset)
         offset += encodings.varint.decode.bytes
         found1 = true
+        break
+        default:
+        offset = skip(prefix & 7, buf, offset)
+      }
+    }
+  }
+}
+
+function defineRegisterExtensionRequest () {
+  RegisterExtensionRequest.encodingLength = encodingLength
+  RegisterExtensionRequest.encode = encode
+  RegisterExtensionRequest.decode = decode
+
+  function encodingLength (obj) {
+    var length = 0
+    if (!defined(obj.id)) throw new Error("id is required")
+    var len = encodings.varint.encodingLength(obj.id)
+    length += 1 + len
+    if (!defined(obj.resourceId)) throw new Error("resourceId is required")
+    var len = encodings.varint.encodingLength(obj.resourceId)
+    length += 1 + len
+    if (!defined(obj.name)) throw new Error("name is required")
+    var len = encodings.string.encodingLength(obj.name)
+    length += 1 + len
+    return length
+  }
+
+  function encode (obj, buf, offset) {
+    if (!offset) offset = 0
+    if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
+    var oldOffset = offset
+    if (!defined(obj.id)) throw new Error("id is required")
+    buf[offset++] = 8
+    encodings.varint.encode(obj.id, buf, offset)
+    offset += encodings.varint.encode.bytes
+    if (!defined(obj.resourceId)) throw new Error("resourceId is required")
+    buf[offset++] = 16
+    encodings.varint.encode(obj.resourceId, buf, offset)
+    offset += encodings.varint.encode.bytes
+    if (!defined(obj.name)) throw new Error("name is required")
+    buf[offset++] = 26
+    encodings.string.encode(obj.name, buf, offset)
+    offset += encodings.string.encode.bytes
+    encode.bytes = offset - oldOffset
+    return buf
+  }
+
+  function decode (buf, offset, end) {
+    if (!offset) offset = 0
+    if (!end) end = buf.length
+    if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
+    var oldOffset = offset
+    var obj = {
+      id: 0,
+      resourceId: 0,
+      name: ""
+    }
+    var found0 = false
+    var found1 = false
+    var found2 = false
+    while (true) {
+      if (end <= offset) {
+        if (!found0 || !found1 || !found2) throw new Error("Decoded message is not valid")
+        decode.bytes = offset - oldOffset
+        return obj
+      }
+      var prefix = varint.decode(buf, offset)
+      offset += varint.decode.bytes
+      var tag = prefix >> 3
+      switch (tag) {
+        case 1:
+        obj.id = encodings.varint.decode(buf, offset)
+        offset += encodings.varint.decode.bytes
+        found0 = true
+        break
+        case 2:
+        obj.resourceId = encodings.varint.decode(buf, offset)
+        offset += encodings.varint.decode.bytes
+        found1 = true
+        break
+        case 3:
+        obj.name = encodings.string.decode(buf, offset)
+        offset += encodings.string.decode.bytes
+        found2 = true
+        break
+        default:
+        offset = skip(prefix & 7, buf, offset)
+      }
+    }
+  }
+}
+
+function defineUnregisterExtensionRequest () {
+  UnregisterExtensionRequest.encodingLength = encodingLength
+  UnregisterExtensionRequest.encode = encode
+  UnregisterExtensionRequest.decode = decode
+
+  function encodingLength (obj) {
+    var length = 0
+    if (!defined(obj.id)) throw new Error("id is required")
+    var len = encodings.varint.encodingLength(obj.id)
+    length += 1 + len
+    if (!defined(obj.resourceId)) throw new Error("resourceId is required")
+    var len = encodings.varint.encodingLength(obj.resourceId)
+    length += 1 + len
+    return length
+  }
+
+  function encode (obj, buf, offset) {
+    if (!offset) offset = 0
+    if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
+    var oldOffset = offset
+    if (!defined(obj.id)) throw new Error("id is required")
+    buf[offset++] = 8
+    encodings.varint.encode(obj.id, buf, offset)
+    offset += encodings.varint.encode.bytes
+    if (!defined(obj.resourceId)) throw new Error("resourceId is required")
+    buf[offset++] = 16
+    encodings.varint.encode(obj.resourceId, buf, offset)
+    offset += encodings.varint.encode.bytes
+    encode.bytes = offset - oldOffset
+    return buf
+  }
+
+  function decode (buf, offset, end) {
+    if (!offset) offset = 0
+    if (!end) end = buf.length
+    if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
+    var oldOffset = offset
+    var obj = {
+      id: 0,
+      resourceId: 0
+    }
+    var found0 = false
+    var found1 = false
+    while (true) {
+      if (end <= offset) {
+        if (!found0 || !found1) throw new Error("Decoded message is not valid")
+        decode.bytes = offset - oldOffset
+        return obj
+      }
+      var prefix = varint.decode(buf, offset)
+      offset += varint.decode.bytes
+      var tag = prefix >> 3
+      switch (tag) {
+        case 1:
+        obj.id = encodings.varint.decode(buf, offset)
+        offset += encodings.varint.decode.bytes
+        found0 = true
+        break
+        case 2:
+        obj.resourceId = encodings.varint.decode(buf, offset)
+        offset += encodings.varint.decode.bytes
+        found1 = true
+        break
+        default:
+        offset = skip(prefix & 7, buf, offset)
+      }
+    }
+  }
+}
+
+function defineExtensionMessage () {
+  ExtensionMessage.encodingLength = encodingLength
+  ExtensionMessage.encode = encode
+  ExtensionMessage.decode = decode
+
+  function encodingLength (obj) {
+    var length = 0
+    if (!defined(obj.id)) throw new Error("id is required")
+    var len = encodings.varint.encodingLength(obj.id)
+    length += 1 + len
+    if (!defined(obj.resourceId)) throw new Error("resourceId is required")
+    var len = encodings.varint.encodingLength(obj.resourceId)
+    length += 1 + len
+    if (defined(obj.remotePublicKey)) {
+      var len = encodings.bytes.encodingLength(obj.remotePublicKey)
+      length += 1 + len
+    }
+    if (!defined(obj.data)) throw new Error("data is required")
+    var len = encodings.bytes.encodingLength(obj.data)
+    length += 1 + len
+    return length
+  }
+
+  function encode (obj, buf, offset) {
+    if (!offset) offset = 0
+    if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
+    var oldOffset = offset
+    if (!defined(obj.id)) throw new Error("id is required")
+    buf[offset++] = 8
+    encodings.varint.encode(obj.id, buf, offset)
+    offset += encodings.varint.encode.bytes
+    if (!defined(obj.resourceId)) throw new Error("resourceId is required")
+    buf[offset++] = 16
+    encodings.varint.encode(obj.resourceId, buf, offset)
+    offset += encodings.varint.encode.bytes
+    if (defined(obj.remotePublicKey)) {
+      buf[offset++] = 26
+      encodings.bytes.encode(obj.remotePublicKey, buf, offset)
+      offset += encodings.bytes.encode.bytes
+    }
+    if (!defined(obj.data)) throw new Error("data is required")
+    buf[offset++] = 34
+    encodings.bytes.encode(obj.data, buf, offset)
+    offset += encodings.bytes.encode.bytes
+    encode.bytes = offset - oldOffset
+    return buf
+  }
+
+  function decode (buf, offset, end) {
+    if (!offset) offset = 0
+    if (!end) end = buf.length
+    if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
+    var oldOffset = offset
+    var obj = {
+      id: 0,
+      resourceId: 0,
+      remotePublicKey: null,
+      data: null
+    }
+    var found0 = false
+    var found1 = false
+    var found3 = false
+    while (true) {
+      if (end <= offset) {
+        if (!found0 || !found1 || !found3) throw new Error("Decoded message is not valid")
+        decode.bytes = offset - oldOffset
+        return obj
+      }
+      var prefix = varint.decode(buf, offset)
+      offset += varint.decode.bytes
+      var tag = prefix >> 3
+      switch (tag) {
+        case 1:
+        obj.id = encodings.varint.decode(buf, offset)
+        offset += encodings.varint.decode.bytes
+        found0 = true
+        break
+        case 2:
+        obj.resourceId = encodings.varint.decode(buf, offset)
+        offset += encodings.varint.decode.bytes
+        found1 = true
+        break
+        case 3:
+        obj.remotePublicKey = encodings.bytes.decode(buf, offset)
+        offset += encodings.bytes.decode.bytes
+        break
+        case 4:
+        obj.data = encodings.bytes.decode(buf, offset)
+        offset += encodings.bytes.decode.bytes
+        found3 = true
         break
         default:
         offset = skip(prefix & 7, buf, offset)
