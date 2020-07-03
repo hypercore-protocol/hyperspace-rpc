@@ -62,6 +62,18 @@ message AllNetworkStatusesResponse {
   repeated NetworkStatus statuses = 1;
 }
 
+message RegisterNetworkExtensionRequest {
+  required uint64 resourceId = 1;
+  required string name = 3;
+}
+
+message NetworkExtensionMessage {
+  required uint64 id = 1;
+  required uint64 resourceId = 2;
+  optional bytes remotePublicKey = 3;
+  required bytes data = 4;
+}
+
 // Hypercore Methods
 
 message CloseRequest {
@@ -151,18 +163,6 @@ message LockRequest {
   required uint64 id = 1;
 }
 
-message RegisterExtensionRequest {
-  required uint64 id = 1;
-  required uint64 resourceId = 2;
-  required string name = 3;
-}
-
-message ExtensionMessage {
-  required uint64 id = 1;
-  required uint64 resourceId = 2;
-  optional bytes remotePublicKey = 3;
-  required bytes data = 4;
-}
 
 // Hypercore Events
 
@@ -184,6 +184,26 @@ message CloseEvent {
 message WaitEvent {
   required uint64 id = 1;
   required uint64 onWaitId = 2;
+}
+
+// Extension Methods
+
+message RegisterExtensionRequest {
+  required uint64 id = 1;
+  required uint64 resourceId = 2;
+  required string name = 3;
+}
+
+message UnregisterExtensionRequest {
+  required uint64 id = 1;
+  required uint64 resourceId = 2;
+}
+
+message ExtensionMessage {
+  required uint64 id = 1;
+  required uint64 resourceId = 2;
+  optional bytes remotePublicKey = 3;
+  required bytes data = 4;
 }
 
 // TODO: Before official release, tag these methods with explicit IDs.
@@ -210,6 +230,7 @@ service Hypercore {
   rpc Cancel (CancelRequest) returns (Void);
   rpc Close (CloseRequest) returns (Void);
   rpc RegisterExtension (RegisterExtensionRequest) returns (Void);
+  rpc UnregisterExtension (UnregisterExtensionRequest) returns (Void);
   rpc SendExtension (ExtensionMessage) returns (Void);
 
   rpc AcquireLock (LockRequest) returns (Void);
@@ -230,8 +251,12 @@ service Network {
   rpc Configure (ConfigureNetworkRequest) returns (Void);
   rpc Status (NetworkStatusRequest) returns (NetworkStatusResponse);
   rpc AllStatuses (Void) returns (AllNetworkStatusesResponse);
+  rpc RegisterExtension (RegisterExtensionRequest) returns (Void);
+  rpc UnregisterExtension (UnregisterExtensionRequest) returns (Void);
+  rpc SendExtension (ExtensionMessage) returns (Void);
 
   // Events
   rpc OnPeerAdd (PeerEvent) returns (Void);
   rpc OnPeerRemove (PeerEvent) returns (Void);
+  rpc OnExtension (ExtensionMessage) returns (Void);
 }
