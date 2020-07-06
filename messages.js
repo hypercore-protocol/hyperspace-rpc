@@ -16,6 +16,13 @@ var Peer = exports.Peer = {
   decode: null
 }
 
+var HyperspaceStatusResponse = exports.HyperspaceStatusResponse = {
+  buffer: true,
+  encodingLength: null,
+  encode: null,
+  decode: null
+}
+
 var OpenRequest = exports.OpenRequest = {
   buffer: true,
   encodingLength: null,
@@ -262,6 +269,7 @@ var RPCError = exports.RPCError = {
 }
 
 definePeer()
+defineHyperspaceStatusResponse()
 defineOpenRequest()
 defineOpenResponse()
 defineFeedEvent()
@@ -374,6 +382,62 @@ function definePeer () {
         obj.type = encodings.string.decode(buf, offset)
         offset += encodings.string.decode.bytes
         found2 = true
+        break
+        default:
+        offset = skip(prefix & 7, buf, offset)
+      }
+    }
+  }
+}
+
+function defineHyperspaceStatusResponse () {
+  HyperspaceStatusResponse.encodingLength = encodingLength
+  HyperspaceStatusResponse.encode = encode
+  HyperspaceStatusResponse.decode = decode
+
+  function encodingLength (obj) {
+    var length = 0
+    if (!defined(obj.apiVersion)) throw new Error("apiVersion is required")
+    var len = encodings.string.encodingLength(obj.apiVersion)
+    length += 1 + len
+    return length
+  }
+
+  function encode (obj, buf, offset) {
+    if (!offset) offset = 0
+    if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
+    var oldOffset = offset
+    if (!defined(obj.apiVersion)) throw new Error("apiVersion is required")
+    buf[offset++] = 10
+    encodings.string.encode(obj.apiVersion, buf, offset)
+    offset += encodings.string.encode.bytes
+    encode.bytes = offset - oldOffset
+    return buf
+  }
+
+  function decode (buf, offset, end) {
+    if (!offset) offset = 0
+    if (!end) end = buf.length
+    if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
+    var oldOffset = offset
+    var obj = {
+      apiVersion: ""
+    }
+    var found0 = false
+    while (true) {
+      if (end <= offset) {
+        if (!found0) throw new Error("Decoded message is not valid")
+        decode.bytes = offset - oldOffset
+        return obj
+      }
+      var prefix = varint.decode(buf, offset)
+      offset += varint.decode.bytes
+      var tag = prefix >> 3
+      switch (tag) {
+        case 1:
+        obj.apiVersion = encodings.string.decode(buf, offset)
+        offset += encodings.string.decode.bytes
+        found0 = true
         break
         default:
         offset = skip(prefix & 7, buf, offset)

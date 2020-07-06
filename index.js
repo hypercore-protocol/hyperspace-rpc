@@ -16,9 +16,33 @@ const errorEncoding = {
   }
 }
 
-class HRPCServiceCorestore {
+class HRPCServiceHyperspace {
   constructor (rpc) {
     const service = rpc.defineService({ id: 1 })
+
+    this._status = service.defineMethod({
+      id: 1,
+      requestEncoding: RPC.NULL,
+      responseEncoding: messages.HyperspaceStatusResponse
+    })
+  }
+
+  onRequest (context, handlers = context) {
+    if (handlers.status) this._status.onrequest = handlers.status.bind(context)
+  }
+
+  status () {
+    return this._status.request()
+  }
+
+  statusNoReply () {
+    return this._status.requestNoReply()
+  }
+}
+
+class HRPCServiceCorestore {
+  constructor (rpc) {
+    const service = rpc.defineService({ id: 2 })
 
     this._open = service.defineMethod({
       id: 1,
@@ -57,7 +81,7 @@ class HRPCServiceCorestore {
 
 class HRPCServiceHypercore {
   constructor (rpc) {
-    const service = rpc.defineService({ id: 2 })
+    const service = rpc.defineService({ id: 3 })
 
     this._get = service.defineMethod({
       id: 1,
@@ -396,7 +420,7 @@ class HRPCServiceHypercore {
 
 class HRPCServiceNetwork {
   constructor (rpc) {
-    const service = rpc.defineService({ id: 3 })
+    const service = rpc.defineService({ id: 4 })
 
     this._open = service.defineMethod({
       id: 1,
@@ -570,6 +594,7 @@ module.exports = class HRPCSession extends HRPC {
       if ((err !== this.rawSocketError && !isStreamError(err)) || this.listenerCount('error')) this.emit('error', err)
     })
 
+    this.hyperspace = new HRPCServiceHyperspace(rpc)
     this.corestore = new HRPCServiceCorestore(rpc)
     this.hypercore = new HRPCServiceHypercore(rpc)
     this.network = new HRPCServiceNetwork(rpc)

@@ -7,6 +7,11 @@ message Peer {
   required string type = 3;
 }
 
+// Hyperspace Methods
+message HyperspaceStatusResponse {
+  required string apiVersion = 1;
+}
+
 // Corestore Methods
 
 message OpenRequest {
@@ -208,6 +213,11 @@ message ExtensionMessage {
 }
 
 // TODO: Before official release, tag these methods with explicit IDs.
+
+service Hyperspace {
+  // Methods
+  rpc Status (Void) returns (HyperspaceStatusResponse);
+}
 
 service Corestore {
    // Methods
