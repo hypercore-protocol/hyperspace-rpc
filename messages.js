@@ -65,6 +65,13 @@ var ConfigureNetworkRequest = exports.ConfigureNetworkRequest = {
   decode: null
 }
 
+var UnconfigureNetworkRequest = exports.UnconfigureNetworkRequest = {
+  buffer: true,
+  encodingLength: null,
+  encode: null,
+  decode: null
+}
+
 var NetworkStatusRequest = exports.NetworkStatusRequest = {
   buffer: true,
   encodingLength: null,
@@ -276,6 +283,7 @@ defineFeedEvent()
 defineOpenNetworkResponse()
 defineNetworkStatus()
 defineConfigureNetworkRequest()
+defineUnconfigureNetworkRequest()
 defineNetworkStatusRequest()
 defineNetworkStatusResponse()
 defineAllNetworkStatusesResponse()
@@ -909,6 +917,9 @@ function defineConfigureNetworkRequest () {
 
   function encodingLength (obj) {
     var length = 0
+    if (!defined(obj.resourceId)) throw new Error("resourceId is required")
+    var len = encodings.varint.encodingLength(obj.resourceId)
+    length += 1 + len
     if (!defined(obj.configuration)) throw new Error("configuration is required")
     var len = NetworkStatus.encodingLength(obj.configuration)
     length += varint.encodingLength(len)
@@ -932,24 +943,28 @@ function defineConfigureNetworkRequest () {
     if (!offset) offset = 0
     if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
     var oldOffset = offset
+    if (!defined(obj.resourceId)) throw new Error("resourceId is required")
+    buf[offset++] = 8
+    encodings.varint.encode(obj.resourceId, buf, offset)
+    offset += encodings.varint.encode.bytes
     if (!defined(obj.configuration)) throw new Error("configuration is required")
-    buf[offset++] = 10
+    buf[offset++] = 18
     varint.encode(NetworkStatus.encodingLength(obj.configuration), buf, offset)
     offset += varint.encode.bytes
     NetworkStatus.encode(obj.configuration, buf, offset)
     offset += NetworkStatus.encode.bytes
     if (defined(obj.flush)) {
-      buf[offset++] = 16
+      buf[offset++] = 24
       encodings.bool.encode(obj.flush, buf, offset)
       offset += encodings.bool.encode.bytes
     }
     if (defined(obj.copyFrom)) {
-      buf[offset++] = 26
+      buf[offset++] = 34
       encodings.bytes.encode(obj.copyFrom, buf, offset)
       offset += encodings.bytes.encode.bytes
     }
     if (defined(obj.overwrite)) {
-      buf[offset++] = 32
+      buf[offset++] = 40
       encodings.bool.encode(obj.overwrite, buf, offset)
       offset += encodings.bool.encode.bytes
     }
@@ -963,15 +978,17 @@ function defineConfigureNetworkRequest () {
     if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
     var oldOffset = offset
     var obj = {
+      resourceId: 0,
       configuration: null,
       flush: false,
       copyFrom: null,
       overwrite: true
     }
     var found0 = false
+    var found1 = false
     while (true) {
       if (end <= offset) {
-        if (!found0) throw new Error("Decoded message is not valid")
+        if (!found0 || !found1) throw new Error("Decoded message is not valid")
         decode.bytes = offset - oldOffset
         return obj
       }
@@ -980,23 +997,98 @@ function defineConfigureNetworkRequest () {
       var tag = prefix >> 3
       switch (tag) {
         case 1:
+        obj.resourceId = encodings.varint.decode(buf, offset)
+        offset += encodings.varint.decode.bytes
+        found0 = true
+        break
+        case 2:
         var len = varint.decode(buf, offset)
         offset += varint.decode.bytes
         obj.configuration = NetworkStatus.decode(buf, offset, offset + len)
         offset += NetworkStatus.decode.bytes
-        found0 = true
+        found1 = true
         break
-        case 2:
+        case 3:
         obj.flush = encodings.bool.decode(buf, offset)
         offset += encodings.bool.decode.bytes
         break
-        case 3:
+        case 4:
         obj.copyFrom = encodings.bytes.decode(buf, offset)
         offset += encodings.bytes.decode.bytes
         break
-        case 4:
+        case 5:
         obj.overwrite = encodings.bool.decode(buf, offset)
         offset += encodings.bool.decode.bytes
+        break
+        default:
+        offset = skip(prefix & 7, buf, offset)
+      }
+    }
+  }
+}
+
+function defineUnconfigureNetworkRequest () {
+  UnconfigureNetworkRequest.encodingLength = encodingLength
+  UnconfigureNetworkRequest.encode = encode
+  UnconfigureNetworkRequest.decode = decode
+
+  function encodingLength (obj) {
+    var length = 0
+    if (!defined(obj.resourceId)) throw new Error("resourceId is required")
+    var len = encodings.varint.encodingLength(obj.resourceId)
+    length += 1 + len
+    if (!defined(obj.discoveryKey)) throw new Error("discoveryKey is required")
+    var len = encodings.bytes.encodingLength(obj.discoveryKey)
+    length += 1 + len
+    return length
+  }
+
+  function encode (obj, buf, offset) {
+    if (!offset) offset = 0
+    if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
+    var oldOffset = offset
+    if (!defined(obj.resourceId)) throw new Error("resourceId is required")
+    buf[offset++] = 8
+    encodings.varint.encode(obj.resourceId, buf, offset)
+    offset += encodings.varint.encode.bytes
+    if (!defined(obj.discoveryKey)) throw new Error("discoveryKey is required")
+    buf[offset++] = 18
+    encodings.bytes.encode(obj.discoveryKey, buf, offset)
+    offset += encodings.bytes.encode.bytes
+    encode.bytes = offset - oldOffset
+    return buf
+  }
+
+  function decode (buf, offset, end) {
+    if (!offset) offset = 0
+    if (!end) end = buf.length
+    if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
+    var oldOffset = offset
+    var obj = {
+      resourceId: 0,
+      discoveryKey: null
+    }
+    var found0 = false
+    var found1 = false
+    while (true) {
+      if (end <= offset) {
+        if (!found0 || !found1) throw new Error("Decoded message is not valid")
+        decode.bytes = offset - oldOffset
+        return obj
+      }
+      var prefix = varint.decode(buf, offset)
+      offset += varint.decode.bytes
+      var tag = prefix >> 3
+      switch (tag) {
+        case 1:
+        obj.resourceId = encodings.varint.decode(buf, offset)
+        offset += encodings.varint.decode.bytes
+        found0 = true
+        break
+        case 2:
+        obj.discoveryKey = encodings.bytes.decode(buf, offset)
+        offset += encodings.bytes.decode.bytes
+        found1 = true
         break
         default:
         offset = skip(prefix & 7, buf, offset)

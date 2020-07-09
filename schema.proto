@@ -50,10 +50,16 @@ message NetworkStatus {
 }
 
 message ConfigureNetworkRequest {
-  required NetworkStatus configuration = 1;
-  optional bool flush = 2;
-  optional bytes copyFrom = 3;
-  optional bool overwrite = 4 [default = true];
+  required uint64 resourceId = 1;
+  required NetworkStatus configuration = 2;
+  optional bool flush = 3;
+  optional bytes copyFrom = 4;
+  optional bool overwrite = 5 [default = true];
+}
+
+message UnconfigureNetworkRequest {
+  required uint64 resourceId = 1;
+  required bytes discoveryKey = 2;
 }
 
 message NetworkStatusRequest {
@@ -260,6 +266,7 @@ service Network {
    // Methods
   rpc Open (Void) returns (OpenNetworkResponse);
   rpc Configure (ConfigureNetworkRequest) returns (Void);
+  rpc Unconfigure (UnconfigureNetworkRequest) returns (Void);
   rpc Status (NetworkStatusRequest) returns (NetworkStatusResponse);
   rpc AllStatuses (Void) returns (AllNetworkStatusesResponse);
   rpc RegisterExtension (RegisterExtensionRequest) returns (Void);
