@@ -587,25 +587,25 @@ function defineOpenResponse () {
     if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
     var oldOffset = offset
     if (!defined(obj.key)) throw new Error("key is required")
-    buf[offset++] = 18
+    buf[offset++] = 10
     encodings.bytes.encode(obj.key, buf, offset)
     offset += encodings.bytes.encode.bytes
     if (!defined(obj.length)) throw new Error("length is required")
-    buf[offset++] = 24
+    buf[offset++] = 16
     encodings.varint.encode(obj.length, buf, offset)
     offset += encodings.varint.encode.bytes
     if (!defined(obj.byteLength)) throw new Error("byteLength is required")
-    buf[offset++] = 32
+    buf[offset++] = 24
     encodings.varint.encode(obj.byteLength, buf, offset)
     offset += encodings.varint.encode.bytes
     if (!defined(obj.writable)) throw new Error("writable is required")
-    buf[offset++] = 40
+    buf[offset++] = 32
     encodings.bool.encode(obj.writable, buf, offset)
     offset += encodings.bool.encode.bytes
     if (defined(obj.peers)) {
       for (var i = 0; i < obj.peers.length; i++) {
         if (!defined(obj.peers[i])) continue
-        buf[offset++] = 50
+        buf[offset++] = 42
         varint.encode(Peer.encodingLength(obj.peers[i]), buf, offset)
         offset += varint.encode.bytes
         Peer.encode(obj.peers[i], buf, offset)
@@ -642,27 +642,27 @@ function defineOpenResponse () {
       offset += varint.decode.bytes
       var tag = prefix >> 3
       switch (tag) {
-        case 2:
+        case 1:
         obj.key = encodings.bytes.decode(buf, offset)
         offset += encodings.bytes.decode.bytes
         found0 = true
         break
-        case 3:
+        case 2:
         obj.length = encodings.varint.decode(buf, offset)
         offset += encodings.varint.decode.bytes
         found1 = true
         break
-        case 4:
+        case 3:
         obj.byteLength = encodings.varint.decode(buf, offset)
         offset += encodings.varint.decode.bytes
         found2 = true
         break
-        case 5:
+        case 4:
         obj.writable = encodings.bool.decode(buf, offset)
         offset += encodings.bool.decode.bytes
         found3 = true
         break
-        case 6:
+        case 5:
         var len = varint.decode(buf, offset)
         offset += varint.decode.bytes
         obj.peers.push(Peer.decode(buf, offset, offset + len))

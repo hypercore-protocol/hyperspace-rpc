@@ -22,11 +22,11 @@ message OpenRequest {
 }
 
 message OpenResponse {
-  required bytes key = 2;
-  required uint64 length = 3;
-  required uint64 byteLength = 4;
-  required bool writable = 5;
-  repeated Peer peers = 6;
+  required bytes key = 1;
+  required uint64 length = 2;
+  required uint64 byteLength = 3;
+  required bool writable = 4;
+  repeated Peer peers = 5;
 }
 
 // Corestore Events
@@ -221,60 +221,67 @@ message ExtensionMessage {
 // TODO: Before official release, tag these methods with explicit IDs.
 
 service Hyperspace {
+  option id = 1;
+
   // Methods
-  rpc Status (Void) returns (HyperspaceStatusResponse);
+  rpc Status (Void) returns (HyperspaceStatusResponse) { option id = 1; }
 }
 
 service Corestore {
+  option id = 2;
+
    // Methods
-  rpc Open (OpenRequest) returns (OpenResponse);
+  rpc Open (OpenRequest) returns (OpenResponse) { option id = 1; }
 
   // Events
-  rpc OnFeed (FeedEvent) returns (Void);
+  rpc OnFeed (FeedEvent) returns (Void)  { option id = 2; }
 }
 
 service Hypercore {
-   // Methods
-  rpc Get (GetRequest) returns (GetResponse);
-  rpc Append (AppendRequest) returns (AppendResponse);
-  rpc Update (UpdateRequest) returns (Void);
-  rpc Seek (SeekRequest) returns (SeekResponse);
-  rpc Has (HasRequest) returns (HasResponse);
-  rpc Cancel (CancelRequest) returns (Void);
-  rpc Download (DownloadRequest) returns (Void);
-  rpc Downloaded (DownloadedRequest) returns (DownloadedResponse);
-  rpc Undownload (UndownloadRequest) returns (Void);
-  rpc Cancel (CancelRequest) returns (Void);
-  rpc Close (CloseRequest) returns (Void);
-  rpc RegisterExtension (RegisterExtensionRequest) returns (Void);
-  rpc UnregisterExtension (UnregisterExtensionRequest) returns (Void);
-  rpc SendExtension (ExtensionMessage) returns (Void);
+  option id = 3;
 
-  rpc AcquireLock (LockRequest) returns (Void);
-  rpc ReleaseLock (LockRequest) returns (Void);
+   // Methods
+  rpc Get (GetRequest) returns (GetResponse) { option id = 1; }
+  rpc Append (AppendRequest) returns (AppendResponse) { option id = 2; }
+  rpc Update (UpdateRequest) returns (Void) { option id = 3; }
+  rpc Seek (SeekRequest) returns (SeekResponse) { option id = 4; }
+  rpc Has (HasRequest) returns (HasResponse) { option id = 5; }
+  rpc Cancel (CancelRequest) returns (Void) { option id = 6; }
+  rpc Download (DownloadRequest) returns (Void) { option id = 7; }
+  rpc Downloaded (DownloadedRequest) returns (DownloadedResponse) { option id = 8; }
+  rpc Undownload (UndownloadRequest) returns (Void) { option id = 9; }
+  rpc Close (CloseRequest) returns (Void) { option id = 10; }
+  rpc RegisterExtension (RegisterExtensionRequest) returns (Void) { option id = 11; }
+  rpc UnregisterExtension (UnregisterExtensionRequest) returns (Void) { option id = 12; }
+  rpc SendExtension (ExtensionMessage) returns (Void) { option id = 13; }
+
+  rpc AcquireLock (LockRequest) returns (Void) { option id = 14; }
+  rpc ReleaseLock (LockRequest) returns (Void) { option id = 15; }
 
   // Events
-  rpc OnAppend (AppendEvent) returns (Void);
-  rpc OnClose (CloseEvent) returns (Void);
-  rpc OnPeerOpen (PeerEvent) returns (Void);
-  rpc OnPeerRemove (PeerEvent) returns (Void);
-  rpc OnExtension (ExtensionMessage) returns (Void);
-  rpc OnWait (WaitEvent) returns (Void);
+  rpc OnAppend (AppendEvent) returns (Void) { option id = 16; }
+  rpc OnClose (CloseEvent) returns (Void) { option id = 17; }
+  rpc OnPeerOpen (PeerEvent) returns (Void) { option id = 18; }
+  rpc OnPeerRemove (PeerEvent) returns (Void) { option id = 19; }
+  rpc OnExtension (ExtensionMessage) returns (Void) { option id = 20; }
+  rpc OnWait (WaitEvent) returns (Void) { option id = 21; }
 }
 
 service Network {
+  option id = 4;
+
    // Methods
-  rpc Open (Void) returns (OpenNetworkResponse);
-  rpc Configure (ConfigureNetworkRequest) returns (Void);
-  rpc Unconfigure (UnconfigureNetworkRequest) returns (Void);
-  rpc Status (NetworkStatusRequest) returns (NetworkStatusResponse);
-  rpc AllStatuses (Void) returns (AllNetworkStatusesResponse);
-  rpc RegisterExtension (RegisterExtensionRequest) returns (Void);
-  rpc UnregisterExtension (UnregisterExtensionRequest) returns (Void);
-  rpc SendExtension (ExtensionMessage) returns (Void);
+  rpc Open (Void) returns (OpenNetworkResponse) { option id = 1; }
+  rpc Configure (ConfigureNetworkRequest) returns (Void) { option id = 2; }
+  rpc Unconfigure (UnconfigureNetworkRequest) returns (Void) { option id = 3; }
+  rpc Status (NetworkStatusRequest) returns (NetworkStatusResponse) { option id = 4; }
+  rpc AllStatuses (Void) returns (AllNetworkStatusesResponse) { option id = 5; }
+  rpc RegisterExtension (RegisterExtensionRequest) returns (Void) { option id = 6; }
+  rpc UnregisterExtension (UnregisterExtensionRequest) returns (Void) { option id = 7; }
+  rpc SendExtension (ExtensionMessage) returns (Void) { option id = 8; }
 
   // Events
-  rpc OnPeerAdd (PeerEvent) returns (Void);
-  rpc OnPeerRemove (PeerEvent) returns (Void);
-  rpc OnExtension (ExtensionMessage) returns (Void);
+  rpc OnPeerAdd (PeerEvent) returns (Void) { option id = 9; }
+  rpc OnPeerRemove (PeerEvent) returns (Void) { option id = 10; }
+  rpc OnExtension (ExtensionMessage) returns (Void) { option id = 11; }
 }

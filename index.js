@@ -137,80 +137,74 @@ class HRPCServiceHypercore {
       responseEncoding: RPC.NULL
     })
 
-    this._cancel = service.defineMethod({
-      id: 10,
-      requestEncoding: messages.CancelRequest,
-      responseEncoding: RPC.NULL
-    })
-
     this._close = service.defineMethod({
-      id: 11,
+      id: 10,
       requestEncoding: messages.CloseRequest,
       responseEncoding: RPC.NULL
     })
 
     this._registerExtension = service.defineMethod({
-      id: 12,
+      id: 11,
       requestEncoding: messages.RegisterExtensionRequest,
       responseEncoding: RPC.NULL
     })
 
     this._unregisterExtension = service.defineMethod({
-      id: 13,
+      id: 12,
       requestEncoding: messages.UnregisterExtensionRequest,
       responseEncoding: RPC.NULL
     })
 
     this._sendExtension = service.defineMethod({
-      id: 14,
+      id: 13,
       requestEncoding: messages.ExtensionMessage,
       responseEncoding: RPC.NULL
     })
 
     this._acquireLock = service.defineMethod({
-      id: 15,
+      id: 14,
       requestEncoding: messages.LockRequest,
       responseEncoding: RPC.NULL
     })
 
     this._releaseLock = service.defineMethod({
-      id: 16,
+      id: 15,
       requestEncoding: messages.LockRequest,
       responseEncoding: RPC.NULL
     })
 
     this._onAppend = service.defineMethod({
-      id: 17,
+      id: 16,
       requestEncoding: messages.AppendEvent,
       responseEncoding: RPC.NULL
     })
 
     this._onClose = service.defineMethod({
-      id: 18,
+      id: 17,
       requestEncoding: messages.CloseEvent,
       responseEncoding: RPC.NULL
     })
 
     this._onPeerOpen = service.defineMethod({
-      id: 19,
+      id: 18,
       requestEncoding: messages.PeerEvent,
       responseEncoding: RPC.NULL
     })
 
     this._onPeerRemove = service.defineMethod({
-      id: 20,
+      id: 19,
       requestEncoding: messages.PeerEvent,
       responseEncoding: RPC.NULL
     })
 
     this._onExtension = service.defineMethod({
-      id: 21,
+      id: 20,
       requestEncoding: messages.ExtensionMessage,
       responseEncoding: RPC.NULL
     })
 
     this._onWait = service.defineMethod({
-      id: 22,
+      id: 21,
       requestEncoding: messages.WaitEvent,
       responseEncoding: RPC.NULL
     })
@@ -226,7 +220,6 @@ class HRPCServiceHypercore {
     if (handlers.download) this._download.onrequest = handlers.download.bind(context)
     if (handlers.downloaded) this._downloaded.onrequest = handlers.downloaded.bind(context)
     if (handlers.undownload) this._undownload.onrequest = handlers.undownload.bind(context)
-    if (handlers.cancel) this._cancel.onrequest = handlers.cancel.bind(context)
     if (handlers.close) this._close.onrequest = handlers.close.bind(context)
     if (handlers.registerExtension) this._registerExtension.onrequest = handlers.registerExtension.bind(context)
     if (handlers.unregisterExtension) this._unregisterExtension.onrequest = handlers.unregisterExtension.bind(context)
@@ -311,14 +304,6 @@ class HRPCServiceHypercore {
 
   undownloadNoReply (data) {
     return this._undownload.requestNoReply(data)
-  }
-
-  cancel (data) {
-    return this._cancel.request(data)
-  }
-
-  cancelNoReply (data) {
-    return this._cancel.requestNoReply(data)
   }
 
   close (data) {
