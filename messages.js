@@ -408,6 +408,14 @@ function defineHyperspaceStatusResponse () {
     if (!defined(obj.apiVersion)) throw new Error("apiVersion is required")
     var len = encodings.string.encodingLength(obj.apiVersion)
     length += 1 + len
+    if (defined(obj.holepunchable)) {
+      var len = encodings.bool.encodingLength(obj.holepunchable)
+      length += 1 + len
+    }
+    if (defined(obj.remoteAddress)) {
+      var len = encodings.string.encodingLength(obj.remoteAddress)
+      length += 1 + len
+    }
     return length
   }
 
@@ -419,6 +427,16 @@ function defineHyperspaceStatusResponse () {
     buf[offset++] = 10
     encodings.string.encode(obj.apiVersion, buf, offset)
     offset += encodings.string.encode.bytes
+    if (defined(obj.holepunchable)) {
+      buf[offset++] = 16
+      encodings.bool.encode(obj.holepunchable, buf, offset)
+      offset += encodings.bool.encode.bytes
+    }
+    if (defined(obj.remoteAddress)) {
+      buf[offset++] = 26
+      encodings.string.encode(obj.remoteAddress, buf, offset)
+      offset += encodings.string.encode.bytes
+    }
     encode.bytes = offset - oldOffset
     return buf
   }
@@ -429,7 +447,9 @@ function defineHyperspaceStatusResponse () {
     if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
     var oldOffset = offset
     var obj = {
-      apiVersion: ""
+      apiVersion: "",
+      holepunchable: false,
+      remoteAddress: ""
     }
     var found0 = false
     while (true) {
@@ -446,6 +466,14 @@ function defineHyperspaceStatusResponse () {
         obj.apiVersion = encodings.string.decode(buf, offset)
         offset += encodings.string.decode.bytes
         found0 = true
+        break
+        case 2:
+        obj.holepunchable = encodings.bool.decode(buf, offset)
+        offset += encodings.bool.decode.bytes
+        break
+        case 3:
+        obj.remoteAddress = encodings.string.decode(buf, offset)
+        offset += encodings.string.decode.bytes
         break
         default:
         offset = skip(prefix & 7, buf, offset)

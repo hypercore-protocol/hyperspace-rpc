@@ -10,6 +10,8 @@ message Peer {
 // Hyperspace Methods
 message HyperspaceStatusResponse {
   required string apiVersion = 1;
+  optional bool holepunchable = 2;
+  optional string remoteAddress = 3;
 }
 
 // Corestore Methods
