@@ -52,16 +52,10 @@ message NetworkStatus {
 }
 
 message ConfigureNetworkRequest {
-  required uint64 resourceId = 1;
-  required NetworkStatus configuration = 2;
-  optional bool flush = 3;
-  optional bytes copyFrom = 4;
-  optional bool overwrite = 5 [default = true];
-}
-
-message UnconfigureNetworkRequest {
-  required uint64 resourceId = 1;
-  required bytes discoveryKey = 2;
+  required NetworkStatus configuration = 1;
+  optional bool flush = 2;
+  optional bytes copyFrom = 3;
+  optional bool overwrite = 4 [default = true];
 }
 
 message NetworkStatusRequest {
@@ -274,16 +268,15 @@ service Network {
 
    // Methods
   rpc Open (Void) returns (OpenNetworkResponse) { option id = 1; }
-  rpc Configure (ConfigureNetworkRequest) returns (Void) { option id = 2; }
-  rpc Unconfigure (UnconfigureNetworkRequest) returns (Void) { option id = 3; }
-  rpc Status (NetworkStatusRequest) returns (NetworkStatusResponse) { option id = 4; }
-  rpc AllStatuses (Void) returns (AllNetworkStatusesResponse) { option id = 5; }
-  rpc RegisterExtension (RegisterExtensionRequest) returns (Void) { option id = 6; }
-  rpc UnregisterExtension (UnregisterExtensionRequest) returns (Void) { option id = 7; }
-  rpc SendExtension (ExtensionMessage) returns (Void) { option id = 8; }
+  rpc Configure (ConfigureNetworkRequest) returns (NetworkStatusResponse) { option id = 2; }
+  rpc Status (NetworkStatusRequest) returns (NetworkStatusResponse) { option id = 3; }
+  rpc AllStatuses (Void) returns (AllNetworkStatusesResponse) { option id = 4; }
+  rpc RegisterExtension (RegisterExtensionRequest) returns (Void) { option id = 5; }
+  rpc UnregisterExtension (UnregisterExtensionRequest) returns (Void) { option id = 6; }
+  rpc SendExtension (ExtensionMessage) returns (Void) { option id = 7; }
 
   // Events
-  rpc OnPeerAdd (PeerEvent) returns (Void) { option id = 9; }
-  rpc OnPeerRemove (PeerEvent) returns (Void) { option id = 10; }
-  rpc OnExtension (ExtensionMessage) returns (Void) { option id = 11; }
+  rpc OnPeerAdd (PeerEvent) returns (Void) { option id = 8; }
+  rpc OnPeerRemove (PeerEvent) returns (Void) { option id = 9; }
+  rpc OnExtension (ExtensionMessage) returns (Void) { option id = 10; }
 }
