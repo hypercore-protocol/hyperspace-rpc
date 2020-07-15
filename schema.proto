@@ -72,7 +72,7 @@ message AllNetworkStatusesResponse {
 
 message RegisterNetworkExtensionRequest {
   required uint64 resourceId = 1;
-  required string name = 3;
+  required string name = 2;
 }
 
 message NetworkExtensionMessage {
@@ -213,8 +213,6 @@ message ExtensionMessage {
   optional bytes remotePublicKey = 3;
   required bytes data = 4;
 }
-
-// TODO: Before official release, tag these methods with explicit IDs.
 
 service Hyperspace {
   option id = 1;

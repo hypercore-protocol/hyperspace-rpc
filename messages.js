@@ -1240,7 +1240,7 @@ function defineRegisterNetworkExtensionRequest () {
     encodings.varint.encode(obj.resourceId, buf, offset)
     offset += encodings.varint.encode.bytes
     if (!defined(obj.name)) throw new Error("name is required")
-    buf[offset++] = 26
+    buf[offset++] = 18
     encodings.string.encode(obj.name, buf, offset)
     offset += encodings.string.encode.bytes
     encode.bytes = offset - oldOffset
@@ -1273,7 +1273,7 @@ function defineRegisterNetworkExtensionRequest () {
         offset += encodings.varint.decode.bytes
         found0 = true
         break
-        case 3:
+        case 2:
         obj.name = encodings.string.decode(buf, offset)
         offset += encodings.string.decode.bytes
         found1 = true
