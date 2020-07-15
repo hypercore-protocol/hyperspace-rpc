@@ -416,59 +416,53 @@ class HRPCServiceNetwork {
     this._configure = service.defineMethod({
       id: 2,
       requestEncoding: messages.ConfigureNetworkRequest,
-      responseEncoding: RPC.NULL
-    })
-
-    this._unconfigure = service.defineMethod({
-      id: 3,
-      requestEncoding: messages.UnconfigureNetworkRequest,
-      responseEncoding: RPC.NULL
+      responseEncoding: messages.NetworkStatusResponse
     })
 
     this._status = service.defineMethod({
-      id: 4,
+      id: 3,
       requestEncoding: messages.NetworkStatusRequest,
       responseEncoding: messages.NetworkStatusResponse
     })
 
     this._allStatuses = service.defineMethod({
-      id: 5,
+      id: 4,
       requestEncoding: RPC.NULL,
       responseEncoding: messages.AllNetworkStatusesResponse
     })
 
     this._registerExtension = service.defineMethod({
-      id: 6,
+      id: 5,
       requestEncoding: messages.RegisterExtensionRequest,
       responseEncoding: RPC.NULL
     })
 
     this._unregisterExtension = service.defineMethod({
-      id: 7,
+      id: 6,
       requestEncoding: messages.UnregisterExtensionRequest,
       responseEncoding: RPC.NULL
     })
 
     this._sendExtension = service.defineMethod({
-      id: 8,
+      id: 7,
       requestEncoding: messages.ExtensionMessage,
       responseEncoding: RPC.NULL
     })
 
     this._onPeerAdd = service.defineMethod({
-      id: 9,
+      id: 8,
       requestEncoding: messages.PeerEvent,
       responseEncoding: RPC.NULL
     })
 
     this._onPeerRemove = service.defineMethod({
-      id: 10,
+      id: 9,
       requestEncoding: messages.PeerEvent,
       responseEncoding: RPC.NULL
     })
 
     this._onExtension = service.defineMethod({
-      id: 11,
+      id: 10,
       requestEncoding: messages.ExtensionMessage,
       responseEncoding: RPC.NULL
     })
@@ -477,7 +471,6 @@ class HRPCServiceNetwork {
   onRequest (context, handlers = context) {
     if (handlers.open) this._open.onrequest = handlers.open.bind(context)
     if (handlers.configure) this._configure.onrequest = handlers.configure.bind(context)
-    if (handlers.unconfigure) this._unconfigure.onrequest = handlers.unconfigure.bind(context)
     if (handlers.status) this._status.onrequest = handlers.status.bind(context)
     if (handlers.allStatuses) this._allStatuses.onrequest = handlers.allStatuses.bind(context)
     if (handlers.registerExtension) this._registerExtension.onrequest = handlers.registerExtension.bind(context)
@@ -502,14 +495,6 @@ class HRPCServiceNetwork {
 
   configureNoReply (data) {
     return this._configure.requestNoReply(data)
-  }
-
-  unconfigure (data) {
-    return this._unconfigure.request(data)
-  }
-
-  unconfigureNoReply (data) {
-    return this._unconfigure.requestNoReply(data)
   }
 
   status (data) {
