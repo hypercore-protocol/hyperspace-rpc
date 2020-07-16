@@ -218,66 +218,66 @@ message ExtensionMessage {
 }
 
 service Hyperspace {
-  option (hrpc.service_id) = 1;
+  option (hrpc.service) = 1;
 
   // Methods
-  rpc Status (hrpc.Void) returns (HyperspaceStatusResponse) { option (hrpc.id) = 1; }
+  rpc Status (hrpc.Void) returns (HyperspaceStatusResponse) { option (hrpc.method) = 1; }
 }
 
 service Corestore {
-  option (hrpc.service_id) = 2;
+  option (hrpc.service) = 2;
 
    // Methods
-  rpc Open (OpenRequest) returns (OpenResponse) { option (hrpc.id) = 1; }
+  rpc Open (OpenRequest) returns (OpenResponse) { option (hrpc.method) = 1; }
 
   // Events
-  rpc OnFeed (FeedEvent) returns (hrpc.Void)  { option (hrpc.id) = 2; }
+  rpc OnFeed (FeedEvent) returns (hrpc.Void)  { option (hrpc.method) = 2; }
 }
 
 service Hypercore {
-  option (hrpc.service_id) = 3;
+  option (hrpc.service) = 3;
 
    // Methods
-  rpc Get (GetRequest) returns (GetResponse) { option (hrpc.id) = 1; }
-  rpc Append (AppendRequest) returns (AppendResponse) { option (hrpc.id) = 2; }
-  rpc Update (UpdateRequest) returns (hrpc.Void) { option (hrpc.id) = 3; }
-  rpc Seek (SeekRequest) returns (SeekResponse) { option (hrpc.id) = 4; }
-  rpc Has (HasRequest) returns (HasResponse) { option (hrpc.id) = 5; }
-  rpc Cancel (CancelRequest) returns (hrpc.Void) { option (hrpc.id) = 6; }
-  rpc Download (DownloadRequest) returns (hrpc.Void) { option (hrpc.id) = 7; }
-  rpc Downloaded (DownloadedRequest) returns (DownloadedResponse) { option (hrpc.id) = 8; }
-  rpc Undownload (UndownloadRequest) returns (hrpc.Void) { option (hrpc.id) = 9; }
-  rpc Close (CloseRequest) returns (hrpc.Void) { option (hrpc.id) = 10; }
-  rpc RegisterExtension (RegisterExtensionRequest) returns (hrpc.Void) { option (hrpc.id) = 11; }
-  rpc UnregisterExtension (UnregisterExtensionRequest) returns (hrpc.Void) { option (hrpc.id) = 12; }
-  rpc SendExtension (ExtensionMessage) returns (hrpc.Void) { option (hrpc.id) = 13; }
+  rpc Get (GetRequest) returns (GetResponse) { option (hrpc.method) = 1; }
+  rpc Append (AppendRequest) returns (AppendResponse) { option (hrpc.method) = 2; }
+  rpc Update (UpdateRequest) returns (hrpc.Void) { option (hrpc.method) = 3; }
+  rpc Seek (SeekRequest) returns (SeekResponse) { option (hrpc.method) = 4; }
+  rpc Has (HasRequest) returns (HasResponse) { option (hrpc.method) = 5; }
+  rpc Cancel (CancelRequest) returns (hrpc.Void) { option (hrpc.method) = 6; }
+  rpc Download (DownloadRequest) returns (hrpc.Void) { option (hrpc.method) = 7; }
+  rpc Downloaded (DownloadedRequest) returns (DownloadedResponse) { option (hrpc.method) = 8; }
+  rpc Undownload (UndownloadRequest) returns (hrpc.Void) { option (hrpc.method) = 9; }
+  rpc Close (CloseRequest) returns (hrpc.Void) { option (hrpc.method) = 10; }
+  rpc RegisterExtension (RegisterExtensionRequest) returns (hrpc.Void) { option (hrpc.method) = 11; }
+  rpc UnregisterExtension (UnregisterExtensionRequest) returns (hrpc.Void) { option (hrpc.method) = 12; }
+  rpc SendExtension (ExtensionMessage) returns (hrpc.Void) { option (hrpc.method) = 13; }
 
-  rpc AcquireLock (LockRequest) returns (hrpc.Void) { option (hrpc.id) = 14; }
-  rpc ReleaseLock (LockRequest) returns (hrpc.Void) { option (hrpc.id) = 15; }
+  rpc AcquireLock (LockRequest) returns (hrpc.Void) { option (hrpc.method) = 14; }
+  rpc ReleaseLock (LockRequest) returns (hrpc.Void) { option (hrpc.method) = 15; }
 
   // Events
-  rpc OnAppend (AppendEvent) returns (hrpc.Void) { option (hrpc.id) = 16; }
-  rpc OnClose (CloseEvent) returns (hrpc.Void) { option (hrpc.id) = 17; }
-  rpc OnPeerOpen (PeerEvent) returns (hrpc.Void) { option (hrpc.id) = 18; }
-  rpc OnPeerRemove (PeerEvent) returns (hrpc.Void) { option (hrpc.id) = 19; }
-  rpc OnExtension (ExtensionMessage) returns (hrpc.Void) { option (hrpc.id) = 20; }
-  rpc OnWait (WaitEvent) returns (hrpc.Void) { option (hrpc.id) = 21; }
+  rpc OnAppend (AppendEvent) returns (hrpc.Void) { option (hrpc.method) = 16; }
+  rpc OnClose (CloseEvent) returns (hrpc.Void) { option (hrpc.method) = 17; }
+  rpc OnPeerOpen (PeerEvent) returns (hrpc.Void) { option (hrpc.method) = 18; }
+  rpc OnPeerRemove (PeerEvent) returns (hrpc.Void) { option (hrpc.method) = 19; }
+  rpc OnExtension (ExtensionMessage) returns (hrpc.Void) { option (hrpc.method) = 20; }
+  rpc OnWait (WaitEvent) returns (hrpc.Void) { option (hrpc.method) = 21; }
 }
 
 service Network {
-  option (hrpc.service_id) = 4;
+  option (hrpc.service) = 4;
 
    // Methods
-  rpc Open (hrpc.Void) returns (OpenNetworkResponse) { option (hrpc.id) = 1; }
-  rpc Configure (ConfigureNetworkRequest) returns (NetworkStatusResponse) { option (hrpc.id) = 2; }
-  rpc Status (NetworkStatusRequest) returns (NetworkStatusResponse) { option (hrpc.id) = 3; }
-  rpc AllStatuses (hrpc.Void) returns (AllNetworkStatusesResponse) { option (hrpc.id) = 4; }
-  rpc RegisterExtension (RegisterExtensionRequest) returns (hrpc.Void) { option (hrpc.id) = 5; }
-  rpc UnregisterExtension (UnregisterExtensionRequest) returns (hrpc.Void) { option (hrpc.id) = 6; }
-  rpc SendExtension (ExtensionMessage) returns (hrpc.Void) { option (hrpc.id) = 7; }
+  rpc Open (hrpc.Void) returns (OpenNetworkResponse) { option (hrpc.method) = 1; }
+  rpc Configure (ConfigureNetworkRequest) returns (NetworkStatusResponse) { option (hrpc.method) = 2; }
+  rpc Status (NetworkStatusRequest) returns (NetworkStatusResponse) { option (hrpc.method) = 3; }
+  rpc AllStatuses (hrpc.Void) returns (AllNetworkStatusesResponse) { option (hrpc.method) = 4; }
+  rpc RegisterExtension (RegisterExtensionRequest) returns (hrpc.Void) { option (hrpc.method) = 5; }
+  rpc UnregisterExtension (UnregisterExtensionRequest) returns (hrpc.Void) { option (hrpc.method) = 6; }
+  rpc SendExtension (ExtensionMessage) returns (hrpc.Void) { option (hrpc.method) = 7; }
 
   // Events
-  rpc OnPeerAdd (PeerEvent) returns (hrpc.Void) { option (hrpc.id) = 8; }
-  rpc OnPeerRemove (PeerEvent) returns (hrpc.Void) { option (hrpc.id) = 9; }
-  rpc OnExtension (ExtensionMessage) returns (hrpc.Void) { option (hrpc.id) = 10; }
+  rpc OnPeerAdd (PeerEvent) returns (hrpc.Void) { option (hrpc.method) = 8; }
+  rpc OnPeerRemove (PeerEvent) returns (hrpc.Void) { option (hrpc.method) = 9; }
+  rpc OnExtension (ExtensionMessage) returns (hrpc.Void) { option (hrpc.method) = 10; }
 }
