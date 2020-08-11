@@ -136,9 +136,12 @@ message SeekResponse {
 message HasRequest {
   required uint32 id = 1;
   required uint64 seq = 2;
+  optional bool bitfield = 3;
+  optional uint64 length = 4;
 }
 message HasResponse {
   required bool has = 1;
+  optional bytes bitfield = 2;
 }
 
 message CancelRequest {

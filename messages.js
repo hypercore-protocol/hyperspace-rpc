@@ -2087,6 +2087,14 @@ function defineHasRequest () {
     if (!defined(obj.seq)) throw new Error("seq is required")
     var len = encodings.varint.encodingLength(obj.seq)
     length += 1 + len
+    if (defined(obj.bitfield)) {
+      var len = encodings.bool.encodingLength(obj.bitfield)
+      length += 1 + len
+    }
+    if (defined(obj.length)) {
+      var len = encodings.varint.encodingLength(obj.length)
+      length += 1 + len
+    }
     return length
   }
 
@@ -2102,6 +2110,16 @@ function defineHasRequest () {
     buf[offset++] = 16
     encodings.varint.encode(obj.seq, buf, offset)
     offset += encodings.varint.encode.bytes
+    if (defined(obj.bitfield)) {
+      buf[offset++] = 24
+      encodings.bool.encode(obj.bitfield, buf, offset)
+      offset += encodings.bool.encode.bytes
+    }
+    if (defined(obj.length)) {
+      buf[offset++] = 32
+      encodings.varint.encode(obj.length, buf, offset)
+      offset += encodings.varint.encode.bytes
+    }
     encode.bytes = offset - oldOffset
     return buf
   }
@@ -2113,7 +2131,9 @@ function defineHasRequest () {
     var oldOffset = offset
     var obj = {
       id: 0,
-      seq: 0
+      seq: 0,
+      bitfield: false,
+      length: 0
     }
     var found0 = false
     var found1 = false
@@ -2137,6 +2157,14 @@ function defineHasRequest () {
         offset += encodings.varint.decode.bytes
         found1 = true
         break
+        case 3:
+        obj.bitfield = encodings.bool.decode(buf, offset)
+        offset += encodings.bool.decode.bytes
+        break
+        case 4:
+        obj.length = encodings.varint.decode(buf, offset)
+        offset += encodings.varint.decode.bytes
+        break
         default:
         offset = skip(prefix & 7, buf, offset)
       }
@@ -2154,6 +2182,10 @@ function defineHasResponse () {
     if (!defined(obj.has)) throw new Error("has is required")
     var len = encodings.bool.encodingLength(obj.has)
     length += 1 + len
+    if (defined(obj.bitfield)) {
+      var len = encodings.bytes.encodingLength(obj.bitfield)
+      length += 1 + len
+    }
     return length
   }
 
@@ -2165,6 +2197,11 @@ function defineHasResponse () {
     buf[offset++] = 8
     encodings.bool.encode(obj.has, buf, offset)
     offset += encodings.bool.encode.bytes
+    if (defined(obj.bitfield)) {
+      buf[offset++] = 18
+      encodings.bytes.encode(obj.bitfield, buf, offset)
+      offset += encodings.bytes.encode.bytes
+    }
     encode.bytes = offset - oldOffset
     return buf
   }
@@ -2175,7 +2212,8 @@ function defineHasResponse () {
     if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
     var oldOffset = offset
     var obj = {
-      has: false
+      has: false,
+      bitfield: null
     }
     var found0 = false
     while (true) {
@@ -2192,6 +2230,10 @@ function defineHasResponse () {
         obj.has = encodings.bool.decode(buf, offset)
         offset += encodings.bool.decode.bytes
         found0 = true
+        break
+        case 2:
+        obj.bitfield = encodings.bytes.decode(buf, offset)
+        offset += encodings.bytes.decode.bytes
         break
         default:
         offset = skip(prefix & 7, buf, offset)
