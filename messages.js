@@ -2896,6 +2896,9 @@ function defineWaitEvent () {
     if (!defined(obj.onWaitId)) throw new Error("onWaitId is required")
     var len = encodings.varint.encodingLength(obj.onWaitId)
     length += 1 + len
+    if (!defined(obj.seq)) throw new Error("seq is required")
+    var len = encodings.varint.encodingLength(obj.seq)
+    length += 1 + len
     return length
   }
 
@@ -2911,6 +2914,10 @@ function defineWaitEvent () {
     buf[offset++] = 16
     encodings.varint.encode(obj.onWaitId, buf, offset)
     offset += encodings.varint.encode.bytes
+    if (!defined(obj.seq)) throw new Error("seq is required")
+    buf[offset++] = 24
+    encodings.varint.encode(obj.seq, buf, offset)
+    offset += encodings.varint.encode.bytes
     encode.bytes = offset - oldOffset
     return buf
   }
@@ -2922,13 +2929,15 @@ function defineWaitEvent () {
     var oldOffset = offset
     var obj = {
       id: 0,
-      onWaitId: 0
+      onWaitId: 0,
+      seq: 0
     }
     var found0 = false
     var found1 = false
+    var found2 = false
     while (true) {
       if (end <= offset) {
-        if (!found0 || !found1) throw new Error("Decoded message is not valid")
+        if (!found0 || !found1 || !found2) throw new Error("Decoded message is not valid")
         decode.bytes = offset - oldOffset
         return obj
       }
@@ -2945,6 +2954,11 @@ function defineWaitEvent () {
         obj.onWaitId = encodings.varint.decode(buf, offset)
         offset += encodings.varint.decode.bytes
         found1 = true
+        break
+        case 3:
+        obj.seq = encodings.varint.decode(buf, offset)
+        offset += encodings.varint.decode.bytes
+        found2 = true
         break
         default:
         offset = skip(prefix & 7, buf, offset)
