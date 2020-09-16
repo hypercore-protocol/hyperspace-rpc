@@ -173,51 +173,51 @@ class HRPCServiceHypercore {
       responseEncoding: RPC.NULL
     })
 
-    this._watchDownloads = service.defineMethod({
-      id: 16,
-      requestEncoding: messages.WatchDownloadsRequest,
-      responseEncoding: RPC.NULL
-    })
-
-    this._unwatchDownloads = service.defineMethod({
-      id: 17,
-      requestEncoding: messages.UnwatchDownloadsRequest,
-      responseEncoding: RPC.NULL
-    })
-
     this._onAppend = service.defineMethod({
-      id: 18,
+      id: 16,
       requestEncoding: messages.AppendEvent,
       responseEncoding: RPC.NULL
     })
 
     this._onClose = service.defineMethod({
-      id: 19,
+      id: 17,
       requestEncoding: messages.CloseEvent,
       responseEncoding: RPC.NULL
     })
 
     this._onPeerOpen = service.defineMethod({
-      id: 20,
+      id: 18,
       requestEncoding: messages.PeerEvent,
       responseEncoding: RPC.NULL
     })
 
     this._onPeerRemove = service.defineMethod({
-      id: 21,
+      id: 19,
       requestEncoding: messages.PeerEvent,
       responseEncoding: RPC.NULL
     })
 
     this._onExtension = service.defineMethod({
-      id: 22,
+      id: 20,
       requestEncoding: messages.ExtensionMessage,
       responseEncoding: RPC.NULL
     })
 
     this._onWait = service.defineMethod({
-      id: 23,
+      id: 21,
       requestEncoding: messages.WaitEvent,
+      responseEncoding: RPC.NULL
+    })
+
+    this._watchDownloads = service.defineMethod({
+      id: 22,
+      requestEncoding: messages.WatchDownloadsRequest,
+      responseEncoding: RPC.NULL
+    })
+
+    this._unwatchDownloads = service.defineMethod({
+      id: 23,
+      requestEncoding: messages.UnwatchDownloadsRequest,
       responseEncoding: RPC.NULL
     })
 
@@ -244,14 +244,14 @@ class HRPCServiceHypercore {
     if (handlers.sendExtension) this._sendExtension.onrequest = handlers.sendExtension.bind(context)
     if (handlers.acquireLock) this._acquireLock.onrequest = handlers.acquireLock.bind(context)
     if (handlers.releaseLock) this._releaseLock.onrequest = handlers.releaseLock.bind(context)
-    if (handlers.watchDownloads) this._watchDownloads.onrequest = handlers.watchDownloads.bind(context)
-    if (handlers.unwatchDownloads) this._unwatchDownloads.onrequest = handlers.unwatchDownloads.bind(context)
     if (handlers.onAppend) this._onAppend.onrequest = handlers.onAppend.bind(context)
     if (handlers.onClose) this._onClose.onrequest = handlers.onClose.bind(context)
     if (handlers.onPeerOpen) this._onPeerOpen.onrequest = handlers.onPeerOpen.bind(context)
     if (handlers.onPeerRemove) this._onPeerRemove.onrequest = handlers.onPeerRemove.bind(context)
     if (handlers.onExtension) this._onExtension.onrequest = handlers.onExtension.bind(context)
     if (handlers.onWait) this._onWait.onrequest = handlers.onWait.bind(context)
+    if (handlers.watchDownloads) this._watchDownloads.onrequest = handlers.watchDownloads.bind(context)
+    if (handlers.unwatchDownloads) this._unwatchDownloads.onrequest = handlers.unwatchDownloads.bind(context)
     if (handlers.onDownload) this._onDownload.onrequest = handlers.onDownload.bind(context)
   }
 
@@ -375,22 +375,6 @@ class HRPCServiceHypercore {
     return this._releaseLock.requestNoReply(data)
   }
 
-  watchDownloads (data) {
-    return this._watchDownloads.request(data)
-  }
-
-  watchDownloadsNoReply (data) {
-    return this._watchDownloads.requestNoReply(data)
-  }
-
-  unwatchDownloads (data) {
-    return this._unwatchDownloads.request(data)
-  }
-
-  unwatchDownloadsNoReply (data) {
-    return this._unwatchDownloads.requestNoReply(data)
-  }
-
   onAppend (data) {
     return this._onAppend.request(data)
   }
@@ -437,6 +421,22 @@ class HRPCServiceHypercore {
 
   onWaitNoReply (data) {
     return this._onWait.requestNoReply(data)
+  }
+
+  watchDownloads (data) {
+    return this._watchDownloads.request(data)
+  }
+
+  watchDownloadsNoReply (data) {
+    return this._watchDownloads.requestNoReply(data)
+  }
+
+  unwatchDownloads (data) {
+    return this._unwatchDownloads.request(data)
+  }
+
+  unwatchDownloadsNoReply (data) {
+    return this._unwatchDownloads.requestNoReply(data)
   }
 
   onDownload (data) {
