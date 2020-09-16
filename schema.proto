@@ -268,16 +268,17 @@ service Hypercore {
   rpc AcquireLock (LockRequest) returns (hrpc.Void) { option (hrpc.method) = 14; }
   rpc ReleaseLock (LockRequest) returns (hrpc.Void) { option (hrpc.method) = 15; }
 
-  rpc WatchDownloads (WatchDownloadsRequest) returns (hrpc.Void) { option (hrpc.method) = 16;  }
-  rpc UnwatchDownloads (UnwatchDownloadsRequest) returns (hrpc.Void) { option (hrpc.method) = 17;  }
-
   // Events
-  rpc OnAppend (AppendEvent) returns (hrpc.Void) { option (hrpc.method) = 18; }
-  rpc OnClose (CloseEvent) returns (hrpc.Void) { option (hrpc.method) = 19; }
-  rpc OnPeerOpen (PeerEvent) returns (hrpc.Void) { option (hrpc.method) = 20; }
-  rpc OnPeerRemove (PeerEvent) returns (hrpc.Void) { option (hrpc.method) = 21; }
-  rpc OnExtension (ExtensionMessage) returns (hrpc.Void) { option (hrpc.method) = 22; }
-  rpc OnWait (WaitEvent) returns (hrpc.Void) { option (hrpc.method) = 23; }
+  rpc OnAppend (AppendEvent) returns (hrpc.Void) { option (hrpc.method) = 16; }
+  rpc OnClose (CloseEvent) returns (hrpc.Void) { option (hrpc.method) = 17; }
+  rpc OnPeerOpen (PeerEvent) returns (hrpc.Void) { option (hrpc.method) = 18; }
+  rpc OnPeerRemove (PeerEvent) returns (hrpc.Void) { option (hrpc.method) = 19; }
+  rpc OnExtension (ExtensionMessage) returns (hrpc.Void) { option (hrpc.method) = 20; }
+  rpc OnWait (WaitEvent) returns (hrpc.Void) { option (hrpc.method) = 21; }
+
+  // Downloads
+  rpc WatchDownloads (WatchDownloadsRequest) returns (hrpc.Void) { option (hrpc.method) = 22;  }
+  rpc UnwatchDownloads (UnwatchDownloadsRequest) returns (hrpc.Void) { option (hrpc.method) = 23;  }
   rpc OnDownload (DownloadEvent) returns (hrpc.Void) { option (hrpc.method) = 24; }
 }
 
