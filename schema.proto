@@ -153,6 +153,7 @@ message DownloadRequest {
   optional uint64 end = 4;
   repeated uint64 blocks = 5;
   optional bool linear = 6;
+  optional bool live = 7; // ie no end (end = -1 in the hypercore api)
 }
 
 message DownloadedRequest {
