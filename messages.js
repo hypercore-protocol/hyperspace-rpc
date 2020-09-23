@@ -2326,6 +2326,10 @@ function defineDownloadRequest () {
       var len = encodings.bool.encodingLength(obj.linear)
       length += 1 + len
     }
+    if (defined(obj.live)) {
+      var len = encodings.bool.encodingLength(obj.live)
+      length += 1 + len
+    }
     return length
   }
 
@@ -2364,6 +2368,11 @@ function defineDownloadRequest () {
       encodings.bool.encode(obj.linear, buf, offset)
       offset += encodings.bool.encode.bytes
     }
+    if (defined(obj.live)) {
+      buf[offset++] = 56
+      encodings.bool.encode(obj.live, buf, offset)
+      offset += encodings.bool.encode.bytes
+    }
     encode.bytes = offset - oldOffset
     return buf
   }
@@ -2379,7 +2388,8 @@ function defineDownloadRequest () {
       start: 0,
       end: 0,
       blocks: [],
-      linear: false
+      linear: false,
+      live: false
     }
     var found0 = false
     var found1 = false
@@ -2417,6 +2427,10 @@ function defineDownloadRequest () {
         break
         case 6:
         obj.linear = encodings.bool.decode(buf, offset)
+        offset += encodings.bool.decode.bytes
+        break
+        case 7:
+        obj.live = encodings.bool.decode(buf, offset)
         offset += encodings.bool.decode.bytes
         break
         default:
