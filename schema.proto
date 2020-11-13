@@ -32,6 +32,7 @@ message OpenResponse {
   required uint64 byteLength = 3;
   required bool writable = 4;
   repeated Peer peers = 5;
+  optional bytes discoveryKey = 6;
 }
 
 // Corestore Events

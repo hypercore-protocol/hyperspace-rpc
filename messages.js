@@ -623,6 +623,10 @@ function defineOpenResponse () {
         length += 1 + len
       }
     }
+    if (defined(obj.discoveryKey)) {
+      var len = encodings.bytes.encodingLength(obj.discoveryKey)
+      length += 1 + len
+    }
     return length
   }
 
@@ -656,6 +660,11 @@ function defineOpenResponse () {
         offset += Peer.encode.bytes
       }
     }
+    if (defined(obj.discoveryKey)) {
+      buf[offset++] = 50
+      encodings.bytes.encode(obj.discoveryKey, buf, offset)
+      offset += encodings.bytes.encode.bytes
+    }
     encode.bytes = offset - oldOffset
     return buf
   }
@@ -670,7 +679,8 @@ function defineOpenResponse () {
       length: 0,
       byteLength: 0,
       writable: false,
-      peers: []
+      peers: [],
+      discoveryKey: null
     }
     var found0 = false
     var found1 = false
@@ -711,6 +721,10 @@ function defineOpenResponse () {
         offset += varint.decode.bytes
         obj.peers.push(Peer.decode(buf, offset, offset + len))
         offset += Peer.decode.bytes
+        break
+        case 6:
+        obj.discoveryKey = encodings.bytes.decode(buf, offset)
+        offset += encodings.bytes.decode.bytes
         break
         default:
         offset = skip(prefix & 7, buf, offset)
