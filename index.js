@@ -226,6 +226,24 @@ class HRPCServiceHypercore {
       requestEncoding: messages.DownloadEvent,
       responseEncoding: RPC.NULL
     })
+
+    this._watchUploads = service.defineMethod({
+      id: 25,
+      requestEncoding: messages.WatchUploadsRequest,
+      responseEncoding: RPC.NULL
+    })
+
+    this._unwatchUploads = service.defineMethod({
+      id: 26,
+      requestEncoding: messages.UnwatchUploadsRequest,
+      responseEncoding: RPC.NULL
+    })
+
+    this._onUpload = service.defineMethod({
+      id: 27,
+      requestEncoding: messages.UploadEvent,
+      responseEncoding: RPC.NULL
+    })
   }
 
   onRequest (context, handlers = context) {
@@ -253,6 +271,9 @@ class HRPCServiceHypercore {
     if (handlers.watchDownloads) this._watchDownloads.onrequest = handlers.watchDownloads.bind(context)
     if (handlers.unwatchDownloads) this._unwatchDownloads.onrequest = handlers.unwatchDownloads.bind(context)
     if (handlers.onDownload) this._onDownload.onrequest = handlers.onDownload.bind(context)
+    if (handlers.watchUploads) this._watchUploads.onrequest = handlers.watchUploads.bind(context)
+    if (handlers.unwatchUploads) this._unwatchUploads.onrequest = handlers.unwatchUploads.bind(context)
+    if (handlers.onUpload) this._onUpload.onrequest = handlers.onUpload.bind(context)
   }
 
   get (data) {
@@ -445,6 +466,30 @@ class HRPCServiceHypercore {
 
   onDownloadNoReply (data) {
     return this._onDownload.requestNoReply(data)
+  }
+
+  watchUploads (data) {
+    return this._watchUploads.request(data)
+  }
+
+  watchUploadsNoReply (data) {
+    return this._watchUploads.requestNoReply(data)
+  }
+
+  unwatchUploads (data) {
+    return this._unwatchUploads.request(data)
+  }
+
+  unwatchUploadsNoReply (data) {
+    return this._unwatchUploads.requestNoReply(data)
+  }
+
+  onUpload (data) {
+    return this._onUpload.request(data)
+  }
+
+  onUploadNoReply (data) {
+    return this._onUpload.requestNoReply(data)
   }
 }
 

@@ -184,6 +184,14 @@ message UnwatchDownloadsRequest {
   required uint64 id = 1;
 }
 
+message WatchUploadsRequest {
+  required uint64 id = 1;
+}
+
+message UnwatchUploadsRequest {
+  required uint64 id = 1;
+}
+
 // Hypercore Events
 
 message AppendEvent {
@@ -208,6 +216,11 @@ message WaitEvent {
 }
 
 message DownloadEvent {
+  required uint64 id = 1;
+  required uint64 seq = 2;
+}
+
+message UploadEvent {
   required uint64 id = 1;
   required uint64 seq = 2;
 }
@@ -282,6 +295,11 @@ service Hypercore {
   rpc WatchDownloads (WatchDownloadsRequest) returns (hrpc.Void) { option (hrpc.method) = 22;  }
   rpc UnwatchDownloads (UnwatchDownloadsRequest) returns (hrpc.Void) { option (hrpc.method) = 23;  }
   rpc OnDownload (DownloadEvent) returns (hrpc.Void) { option (hrpc.method) = 24; }
+
+  // Uploads
+  rpc WatchUploads (WatchUploadsRequest) returns (hrpc.Void) { option (hrpc.method) = 25;  }
+  rpc UnwatchUploads (UnwatchUploadsRequest) returns (hrpc.Void) { option (hrpc.method) = 26;  }
+  rpc OnUpload (UploadEvent) returns (hrpc.Void) { option (hrpc.method) = 27; }
 }
 
 service Network {
