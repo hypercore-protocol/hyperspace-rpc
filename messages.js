@@ -3280,6 +3280,9 @@ function defineDownloadEvent () {
     if (!defined(obj.seq)) throw new Error("seq is required")
     var len = encodings.varint.encodingLength(obj.seq)
     length += 1 + len
+    if (!defined(obj.byteLength)) throw new Error("byteLength is required")
+    var len = encodings.varint.encodingLength(obj.byteLength)
+    length += 1 + len
     return length
   }
 
@@ -3295,6 +3298,10 @@ function defineDownloadEvent () {
     buf[offset++] = 16
     encodings.varint.encode(obj.seq, buf, offset)
     offset += encodings.varint.encode.bytes
+    if (!defined(obj.byteLength)) throw new Error("byteLength is required")
+    buf[offset++] = 24
+    encodings.varint.encode(obj.byteLength, buf, offset)
+    offset += encodings.varint.encode.bytes
     encode.bytes = offset - oldOffset
     return buf
   }
@@ -3306,13 +3313,15 @@ function defineDownloadEvent () {
     var oldOffset = offset
     var obj = {
       id: 0,
-      seq: 0
+      seq: 0,
+      byteLength: 0
     }
     var found0 = false
     var found1 = false
+    var found2 = false
     while (true) {
       if (end <= offset) {
-        if (!found0 || !found1) throw new Error("Decoded message is not valid")
+        if (!found0 || !found1 || !found2) throw new Error("Decoded message is not valid")
         decode.bytes = offset - oldOffset
         return obj
       }
@@ -3329,6 +3338,11 @@ function defineDownloadEvent () {
         obj.seq = encodings.varint.decode(buf, offset)
         offset += encodings.varint.decode.bytes
         found1 = true
+        break
+        case 3:
+        obj.byteLength = encodings.varint.decode(buf, offset)
+        offset += encodings.varint.decode.bytes
+        found2 = true
         break
         default:
         offset = skip(prefix & 7, buf, offset)
@@ -3350,6 +3364,9 @@ function defineUploadEvent () {
     if (!defined(obj.seq)) throw new Error("seq is required")
     var len = encodings.varint.encodingLength(obj.seq)
     length += 1 + len
+    if (!defined(obj.byteLength)) throw new Error("byteLength is required")
+    var len = encodings.varint.encodingLength(obj.byteLength)
+    length += 1 + len
     return length
   }
 
@@ -3365,6 +3382,10 @@ function defineUploadEvent () {
     buf[offset++] = 16
     encodings.varint.encode(obj.seq, buf, offset)
     offset += encodings.varint.encode.bytes
+    if (!defined(obj.byteLength)) throw new Error("byteLength is required")
+    buf[offset++] = 24
+    encodings.varint.encode(obj.byteLength, buf, offset)
+    offset += encodings.varint.encode.bytes
     encode.bytes = offset - oldOffset
     return buf
   }
@@ -3376,13 +3397,15 @@ function defineUploadEvent () {
     var oldOffset = offset
     var obj = {
       id: 0,
-      seq: 0
+      seq: 0,
+      byteLength: 0
     }
     var found0 = false
     var found1 = false
+    var found2 = false
     while (true) {
       if (end <= offset) {
-        if (!found0 || !found1) throw new Error("Decoded message is not valid")
+        if (!found0 || !found1 || !found2) throw new Error("Decoded message is not valid")
         decode.bytes = offset - oldOffset
         return obj
       }
@@ -3399,6 +3422,11 @@ function defineUploadEvent () {
         obj.seq = encodings.varint.decode(buf, offset)
         offset += encodings.varint.decode.bytes
         found1 = true
+        break
+        case 3:
+        obj.byteLength = encodings.varint.decode(buf, offset)
+        offset += encodings.varint.decode.bytes
+        found2 = true
         break
         default:
         offset = skip(prefix & 7, buf, offset)
