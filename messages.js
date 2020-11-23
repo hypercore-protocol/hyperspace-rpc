@@ -226,6 +226,20 @@ var UnwatchDownloadsRequest = exports.UnwatchDownloadsRequest = {
   decode: null
 }
 
+var WatchUploadsRequest = exports.WatchUploadsRequest = {
+  buffer: true,
+  encodingLength: null,
+  encode: null,
+  decode: null
+}
+
+var UnwatchUploadsRequest = exports.UnwatchUploadsRequest = {
+  buffer: true,
+  encodingLength: null,
+  encode: null,
+  decode: null
+}
+
 var AppendEvent = exports.AppendEvent = {
   buffer: true,
   encodingLength: null,
@@ -255,6 +269,13 @@ var WaitEvent = exports.WaitEvent = {
 }
 
 var DownloadEvent = exports.DownloadEvent = {
+  buffer: true,
+  encodingLength: null,
+  encode: null,
+  decode: null
+}
+
+var UploadEvent = exports.UploadEvent = {
   buffer: true,
   encodingLength: null,
   encode: null,
@@ -320,11 +341,14 @@ defineUndownloadRequest()
 defineLockRequest()
 defineWatchDownloadsRequest()
 defineUnwatchDownloadsRequest()
+defineWatchUploadsRequest()
+defineUnwatchUploadsRequest()
 defineAppendEvent()
 definePeerEvent()
 defineCloseEvent()
 defineWaitEvent()
 defineDownloadEvent()
+defineUploadEvent()
 defineRegisterExtensionRequest()
 defineUnregisterExtensionRequest()
 defineExtensionMessage()
@@ -2832,6 +2856,118 @@ function defineUnwatchDownloadsRequest () {
   }
 }
 
+function defineWatchUploadsRequest () {
+  WatchUploadsRequest.encodingLength = encodingLength
+  WatchUploadsRequest.encode = encode
+  WatchUploadsRequest.decode = decode
+
+  function encodingLength (obj) {
+    var length = 0
+    if (!defined(obj.id)) throw new Error("id is required")
+    var len = encodings.varint.encodingLength(obj.id)
+    length += 1 + len
+    return length
+  }
+
+  function encode (obj, buf, offset) {
+    if (!offset) offset = 0
+    if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
+    var oldOffset = offset
+    if (!defined(obj.id)) throw new Error("id is required")
+    buf[offset++] = 8
+    encodings.varint.encode(obj.id, buf, offset)
+    offset += encodings.varint.encode.bytes
+    encode.bytes = offset - oldOffset
+    return buf
+  }
+
+  function decode (buf, offset, end) {
+    if (!offset) offset = 0
+    if (!end) end = buf.length
+    if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
+    var oldOffset = offset
+    var obj = {
+      id: 0
+    }
+    var found0 = false
+    while (true) {
+      if (end <= offset) {
+        if (!found0) throw new Error("Decoded message is not valid")
+        decode.bytes = offset - oldOffset
+        return obj
+      }
+      var prefix = varint.decode(buf, offset)
+      offset += varint.decode.bytes
+      var tag = prefix >> 3
+      switch (tag) {
+        case 1:
+        obj.id = encodings.varint.decode(buf, offset)
+        offset += encodings.varint.decode.bytes
+        found0 = true
+        break
+        default:
+        offset = skip(prefix & 7, buf, offset)
+      }
+    }
+  }
+}
+
+function defineUnwatchUploadsRequest () {
+  UnwatchUploadsRequest.encodingLength = encodingLength
+  UnwatchUploadsRequest.encode = encode
+  UnwatchUploadsRequest.decode = decode
+
+  function encodingLength (obj) {
+    var length = 0
+    if (!defined(obj.id)) throw new Error("id is required")
+    var len = encodings.varint.encodingLength(obj.id)
+    length += 1 + len
+    return length
+  }
+
+  function encode (obj, buf, offset) {
+    if (!offset) offset = 0
+    if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
+    var oldOffset = offset
+    if (!defined(obj.id)) throw new Error("id is required")
+    buf[offset++] = 8
+    encodings.varint.encode(obj.id, buf, offset)
+    offset += encodings.varint.encode.bytes
+    encode.bytes = offset - oldOffset
+    return buf
+  }
+
+  function decode (buf, offset, end) {
+    if (!offset) offset = 0
+    if (!end) end = buf.length
+    if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
+    var oldOffset = offset
+    var obj = {
+      id: 0
+    }
+    var found0 = false
+    while (true) {
+      if (end <= offset) {
+        if (!found0) throw new Error("Decoded message is not valid")
+        decode.bytes = offset - oldOffset
+        return obj
+      }
+      var prefix = varint.decode(buf, offset)
+      offset += varint.decode.bytes
+      var tag = prefix >> 3
+      switch (tag) {
+        case 1:
+        obj.id = encodings.varint.decode(buf, offset)
+        offset += encodings.varint.decode.bytes
+        found0 = true
+        break
+        default:
+        offset = skip(prefix & 7, buf, offset)
+      }
+    }
+  }
+}
+
 function defineAppendEvent () {
   AppendEvent.encodingLength = encodingLength
   AppendEvent.encode = encode
@@ -3135,6 +3271,76 @@ function defineDownloadEvent () {
   DownloadEvent.encodingLength = encodingLength
   DownloadEvent.encode = encode
   DownloadEvent.decode = decode
+
+  function encodingLength (obj) {
+    var length = 0
+    if (!defined(obj.id)) throw new Error("id is required")
+    var len = encodings.varint.encodingLength(obj.id)
+    length += 1 + len
+    if (!defined(obj.seq)) throw new Error("seq is required")
+    var len = encodings.varint.encodingLength(obj.seq)
+    length += 1 + len
+    return length
+  }
+
+  function encode (obj, buf, offset) {
+    if (!offset) offset = 0
+    if (!buf) buf = Buffer.allocUnsafe(encodingLength(obj))
+    var oldOffset = offset
+    if (!defined(obj.id)) throw new Error("id is required")
+    buf[offset++] = 8
+    encodings.varint.encode(obj.id, buf, offset)
+    offset += encodings.varint.encode.bytes
+    if (!defined(obj.seq)) throw new Error("seq is required")
+    buf[offset++] = 16
+    encodings.varint.encode(obj.seq, buf, offset)
+    offset += encodings.varint.encode.bytes
+    encode.bytes = offset - oldOffset
+    return buf
+  }
+
+  function decode (buf, offset, end) {
+    if (!offset) offset = 0
+    if (!end) end = buf.length
+    if (!(end <= buf.length && offset <= buf.length)) throw new Error("Decoded message is not valid")
+    var oldOffset = offset
+    var obj = {
+      id: 0,
+      seq: 0
+    }
+    var found0 = false
+    var found1 = false
+    while (true) {
+      if (end <= offset) {
+        if (!found0 || !found1) throw new Error("Decoded message is not valid")
+        decode.bytes = offset - oldOffset
+        return obj
+      }
+      var prefix = varint.decode(buf, offset)
+      offset += varint.decode.bytes
+      var tag = prefix >> 3
+      switch (tag) {
+        case 1:
+        obj.id = encodings.varint.decode(buf, offset)
+        offset += encodings.varint.decode.bytes
+        found0 = true
+        break
+        case 2:
+        obj.seq = encodings.varint.decode(buf, offset)
+        offset += encodings.varint.decode.bytes
+        found1 = true
+        break
+        default:
+        offset = skip(prefix & 7, buf, offset)
+      }
+    }
+  }
+}
+
+function defineUploadEvent () {
+  UploadEvent.encodingLength = encodingLength
+  UploadEvent.encode = encode
+  UploadEvent.decode = decode
 
   function encodingLength (obj) {
     var length = 0
