@@ -218,11 +218,13 @@ message WaitEvent {
 message DownloadEvent {
   required uint64 id = 1;
   required uint64 seq = 2;
+  required uint64 byteLength = 3;
 }
 
 message UploadEvent {
   required uint64 id = 1;
   required uint64 seq = 2;
+  required uint64 byteLength = 3;
 }
 
 // Extension Methods
