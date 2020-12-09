@@ -252,6 +252,7 @@ service Hyperspace {
 
   // Methods
   rpc Status (hrpc.Void) returns (HyperspaceStatusResponse) { option (hrpc.method) = 1; }
+  rpc Stop (hrpc.Void) returns (hrpc.Void) { option (hrpc.method) = 2; }
 }
 
 service Corestore {

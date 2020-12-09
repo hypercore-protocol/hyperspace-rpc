@@ -25,10 +25,17 @@ class HRPCServiceHyperspace {
       requestEncoding: RPC.NULL,
       responseEncoding: messages.HyperspaceStatusResponse
     })
+
+    this._stop = service.defineMethod({
+      id: 2,
+      requestEncoding: RPC.NULL,
+      responseEncoding: RPC.NULL
+    })
   }
 
   onRequest (context, handlers = context) {
     if (handlers.status) this._status.onrequest = handlers.status.bind(context)
+    if (handlers.stop) this._stop.onrequest = handlers.stop.bind(context)
   }
 
   status () {
@@ -37,6 +44,14 @@ class HRPCServiceHyperspace {
 
   statusNoReply () {
     return this._status.requestNoReply()
+  }
+
+  stop () {
+    return this._stop.request()
+  }
+
+  stopNoReply () {
+    return this._stop.requestNoReply()
   }
 }
 
