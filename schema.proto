@@ -15,6 +15,7 @@ message HyperspaceStatusResponse {
   required string apiVersion = 1;
   optional bool holepunchable = 2;
   optional string remoteAddress = 3;
+  optional string version = 4;
 }
 
 // Corestore Methods

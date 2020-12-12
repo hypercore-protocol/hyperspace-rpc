@@ -456,6 +456,10 @@ function defineHyperspaceStatusResponse () {
       var len = encodings.string.encodingLength(obj.remoteAddress)
       length += 1 + len
     }
+    if (defined(obj.version)) {
+      var len = encodings.string.encodingLength(obj.version)
+      length += 1 + len
+    }
     return length
   }
 
@@ -477,6 +481,11 @@ function defineHyperspaceStatusResponse () {
       encodings.string.encode(obj.remoteAddress, buf, offset)
       offset += encodings.string.encode.bytes
     }
+    if (defined(obj.version)) {
+      buf[offset++] = 34
+      encodings.string.encode(obj.version, buf, offset)
+      offset += encodings.string.encode.bytes
+    }
     encode.bytes = offset - oldOffset
     return buf
   }
@@ -489,7 +498,8 @@ function defineHyperspaceStatusResponse () {
     var obj = {
       apiVersion: "",
       holepunchable: false,
-      remoteAddress: ""
+      remoteAddress: "",
+      version: ""
     }
     var found0 = false
     while (true) {
@@ -513,6 +523,10 @@ function defineHyperspaceStatusResponse () {
         break
         case 3:
         obj.remoteAddress = encodings.string.decode(buf, offset)
+        offset += encodings.string.decode.bytes
+        break
+        case 4:
+        obj.version = encodings.string.decode(buf, offset)
         offset += encodings.string.decode.bytes
         break
         default:
