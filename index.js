@@ -696,5 +696,5 @@ module.exports = class HRPCSession extends HRPC {
 }
 
 function isStreamError (err) {
-  return err.message === 'Writable stream closed prematurely' || err.message === 'Readable stream closed prematurely'
+  return err.message === 'Writable stream closed prematurely' || err.message === 'Readable stream closed before ending'
 }
