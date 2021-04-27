@@ -1,6 +1,6 @@
 {
   "name": "@hyperspace/rpc",
-  "version": "1.15.0",
+  "version": "1.15.1",
   "description": "Raw RPC layer for Hyperspace",
   "main": "index.js",
   "scripts": {
